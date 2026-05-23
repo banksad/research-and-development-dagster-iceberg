@@ -3,51 +3,44 @@
 - **Status:** Proposed
 - **Date:** 2026-05-23
 
-## Context
-This project currently runs as a pandas-based analytical pipeline with stage-oriented `run_*` functions orchestrated by the main pipeline entrypoint. The objective is to evolve orchestration and persistence without changing statistical intent or business meaning.
+## Current state
+- The repository currently operates as a pandas-based analytical pipeline with substantial legacy file-path and run-mode orchestration.
+- Legacy concepts such as freezing/construction exist as file-era workflow mechanisms.
+- Existing pathway remains useful as a **parity oracle** during migration, but is not the desired end-state runtime.
 
-## Decision
-Adopt a target architecture where:
+## Target state
+Adopt a **lean Dagster/Iceberg-native analytical pipeline** where:
 
-1. **Dagster assets** become the primary orchestration abstraction.
-2. **Apache Iceberg tables** become the canonical persistence layer for:
+1. **Dagster assets + asset checks** are the orchestration and quality-control layer.
+2. **Apache Iceberg tables** are the canonical persistence layer for:
    - source inputs,
    - intermediate assets,
    - QA outputs,
    - final analytical outputs.
-3. **CSV files** become optional export artefacts for interoperability and downstream consumers that still require file-based extracts.
+3. **CSV files** are optional terminal export artefacts only.
+4. Legacy freezing/construction behavior is replaced by explicit, auditable data-model mechanisms.
 
-## Initial migration shape
-To reduce risk, initial Dagster assets should wrap existing `run_*` functions rather than rewriting internals. This preserves known stage boundaries and behavior while introducing orchestration metadata, lineage, and asset-level observability.
+## Migration principles alignment
+This architecture is implemented under the following constraints:
+- Preserve statistical/business meaning unless explicitly approved to change.
+- Keep migration PRs scoped, reversible, and sequenced.
+- Prefer extraction of core transforms into pure pandas/domain functions.
+- Deprecate legacy orchestration/plumbing that does not contribute analytical meaning.
+- Treat old pipeline as temporary parity support only.
 
-## Dagster asset checks
-Asset checks should be introduced incrementally and grouped into:
-- configuration validation,
-- schema validation,
-- data quality checks,
-- reconciliation checks.
+## Parity and equivalence expectations
+Any orchestration/persistence pathway change must:
+- declare expected numerical equivalence scope,
+- add reconciliation checks/evidence against the oracle pathway,
+- classify and explain any observed differences.
 
-Where possible, these checks should reuse existing configuration/schema validation logic to avoid duplicate validation rules.
-
-## Numerical equivalence expectation
-Migration work must preserve numerical outputs and interpretations relative to the current pipeline. Any deviation must be explicit, justified, and approved.
-
-## Consequences
-### Positive
-- Clear lineage and orchestration visibility through asset materializations.
-- Canonical table-based persistence suitable for reproducibility and governed evolution.
-- Reduced coupling to CSV as a storage mechanism.
-
-### Trade-offs
-- Temporary dual representations (Iceberg canonical + CSV exports) may increase complexity during transition.
-- Team will need operational conventions for asset/check ownership and release discipline.
-
-## Non-goals (for early PRs)
-- Rewriting statistical algorithms.
-- Changing business definitions/metrics.
-- Migrating all stages in a single PR.
+## Non-goals
+- Preserving legacy runtime compatibility for its own sake.
+- Reintroducing file-path plumbing as a long-term contract.
+- Rewriting validated statistical logic without explicit request.
 
 ## Phased rollout intent
-- **PR 0:** documentation and migration guardrails.
-- **PR 1+:** thin Dagster scaffolding and pilot wrapper assets.
-- **Later phases:** broaden asset coverage, introduce canonical Iceberg writes, and progressively move CSV to export-only responsibilities.
+- **Phase 0 (docs/contracts):** architecture notes, principles, deprecation mapping, parity expectations.
+- **Phase 1 (logic boundary):** isolate business transforms from legacy orchestration and file I/O.
+- **Phase 2 (Dagster/Iceberg implementation):** materialize canonical inputs/intermediates/QA/finals as assets/tables.
+- **Phase 3 (deprecation):** retire legacy freezing/construction/file-era modules once parity is demonstrated.
