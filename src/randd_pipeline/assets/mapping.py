@@ -120,7 +120,7 @@ else:
 
     @asset(key=AssetKey(["intermediate", "mapped_responses"]))
     def mapped_responses(table_store: TableStoreResource) -> dict[str, Any]:
-        """Materialise mapped responses through the clean foreign-ownership seam."""
+        """Materialise canonical mapped responses for the current v1 mapping scope."""
 
         store = table_store.get_table_store()
 
@@ -161,6 +161,8 @@ else:
 
     @asset(key=AssetKey(["intermediate", "cell_number_mapped_responses"]))
     def cell_number_mapped_responses(table_store: TableStoreResource) -> dict[str, Any]:
+        """Materialise temporary checkpoint/debug mapped responses for transition only."""
+
         store = table_store.get_table_store()
         mapped_responses_df = store.read_table_as_dataframe(refs.INTERMEDIATE_MAPPED_RESPONSES)
         mapper_df = store.read_table_as_dataframe(refs.REF_CELL_NUMBER_MAPPER)

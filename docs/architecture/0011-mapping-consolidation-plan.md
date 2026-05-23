@@ -234,3 +234,9 @@ This plan does **not**:
 - add new mapping seams;
 - start imputation;
 - reintroduce or lift-and-shift legacy `run_mapping`.
+
+### Follow-up status update
+
+- `mapped_responses` is now the production-facing v1 mapping output.
+- `mapped_responses_cell_number_mapping_complete` is registered in the default Dagster definitions for canonical `intermediate.mapped_responses`.
+- `cell_number_mapped_responses` is no longer required in the default production-facing mapping chain and is treated as checkpoint/debug-only pending final deprecation/removal.

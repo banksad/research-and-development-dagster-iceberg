@@ -58,6 +58,7 @@ def _build_defs(resource: TableStoreResource):
             getattr(mapping_checks_mod, "mapped_responses_required_columns"),
             getattr(mapping_checks_mod, "mapped_responses_unique_grain"),
             getattr(mapping_checks_mod, "mapped_responses_ultfoc_present"),
+            getattr(mapping_checks_mod, "mapped_responses_cell_number_mapping_complete"),
             getattr(ref_checks_mod, "ultfoc_mapper_table_exists"),
             getattr(ref_checks_mod, "ultfoc_mapper_non_empty"),
             getattr(ref_checks_mod, "ultfoc_mapper_required_columns"),

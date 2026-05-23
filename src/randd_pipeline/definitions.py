@@ -12,7 +12,6 @@ try:
     from dagster import Definitions
     from src.randd_pipeline.assets.inputs import raw_full_responses
     from src.randd_pipeline.assets.mapping import (
-        cell_number_mapped_responses,
         cell_number_mapper,
         mapped_responses,
         ultfoc_mapper,
@@ -24,14 +23,10 @@ try:
         raw_full_responses_table_exists,
     )
     from src.randd_pipeline.checks.mapping_asset_checks import (
-        cell_number_mapped_responses_mapping_columns_present,
-        cell_number_mapped_responses_non_empty,
-        cell_number_mapped_responses_required_columns,
-        cell_number_mapped_responses_table_exists,
-        cell_number_mapped_responses_unique_grain,
         mapped_responses_non_empty,
         mapped_responses_required_columns,
         mapped_responses_table_exists,
+        mapped_responses_cell_number_mapping_complete,
         mapped_responses_ultfoc_present,
         mapped_responses_unique_grain,
     )
@@ -74,7 +69,6 @@ else:
         ultfoc_mapper,
         mapped_responses,
         cell_number_mapper,
-        cell_number_mapped_responses,
     ]
     _asset_checks = [
         raw_full_responses_table_exists,
@@ -93,17 +87,16 @@ else:
         mapped_responses_required_columns,
         mapped_responses_unique_grain,
         mapped_responses_ultfoc_present,
+        mapped_responses_cell_number_mapping_complete,
         cell_number_mapper_table_exists,
         cell_number_mapper_non_empty,
         cell_number_mapper_required_columns,
         cell_number_mapper_unique_cellnumber,
         cell_number_mapper_cellnumber_range,
-        cell_number_mapped_responses_table_exists,
-        cell_number_mapped_responses_non_empty,
-        cell_number_mapped_responses_required_columns,
-        cell_number_mapped_responses_unique_grain,
-        cell_number_mapped_responses_mapping_columns_present,
     ]
+    # NOTE: cell_number_mapped_responses remains available as a temporary
+    # checkpoint/debug asset but is intentionally excluded from default
+    # production-facing Dagster definitions.
 
 
 defs = Definitions(assets=_assets, asset_checks=_asset_checks)
