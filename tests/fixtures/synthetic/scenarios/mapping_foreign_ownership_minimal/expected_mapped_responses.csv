@@ -1,0 +1,5 @@
+reference,instance,survey_type,survey_year,ultfoc,formtype,601
+SYN1001,1,BERD,2025,US,A,100
+SYN1002,1,BERD,2025,GB,A,200
+SYN1003,2,BERD,2025,GB,B,300
+SYN1004,1,BERD,2025,FR,B,400
