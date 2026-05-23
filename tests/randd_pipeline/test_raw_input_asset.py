@@ -56,6 +56,40 @@ def test_raw_full_responses_asset_materialises_fixture_to_local_table_store(tmp_
     assert_frame_equal_sorted(actual, expected, sort_by=["reference", "instance"])
 
 
+def test_raw_full_responses_asset_duplicate_materialisation_fails_when_table_exists(tmp_path) -> None:
+    raw_path = scenario_path(SCENARIO_ID) / "raw_full_responses.csv"
+
+    resource = TableStoreResource(
+        catalog_name="raw-input-asset-duplicate-smoke",
+        catalog_type="local_sql",
+        warehouse=str(tmp_path / "warehouse"),
+    )
+
+    inputs_mod = importlib.import_module("src.randd_pipeline.assets.inputs")
+    raw_full_responses_asset = getattr(inputs_mod, "raw_full_responses")
+
+    defs = dagster.Definitions(
+        assets=[raw_full_responses_asset],
+        resources={"table_store": resource},
+    )
+
+    run_config = {
+        "ops": {
+            "raw_full_responses": {
+                "config": {
+                    "csv_path": str(raw_path),
+                }
+            }
+        }
+    }
+
+    first_result = defs.get_implicit_global_asset_job_def().execute_in_process(run_config=run_config)
+    assert first_result.success
+
+    with pytest.raises(ValueError, match="already exists"):
+        defs.get_implicit_global_asset_job_def().execute_in_process(run_config=run_config, raise_on_error=True)
+
+
 def test_raw_input_asset_smoke_does_not_import_legacy_pipeline_or_staging_modules(tmp_path) -> None:
     raw_path = scenario_path(SCENARIO_ID) / "raw_full_responses.csv"
 
