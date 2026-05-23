@@ -66,6 +66,21 @@ contracts:
       - "Used by the first clean mapping seam for foreign ownership mapping."
       - "Tiny synthetic fixtures use this contract; production reference-data loading is not implemented here."
 
+
+
+  - identifier: ref.cell_number_mapper
+    namespace: ref
+    table: cell_number_mapper
+    description: Cell-number reference mapper from cell number to universe metadata.
+    layer: ref
+    owner: randd-reference-data
+    expected_grain: one row per cellnumber
+    primary_key: cellnumber
+    partition_by: []
+    required_columns: [cellnumber, uni_count, uni_employment]
+    notes:
+      - "CSV ingestion may accept legacy-shaped columns cell_no and UNI_Count, but this table is canonicalised to cellnumber and uni_count."
+
   - identifier: ref.postcode_mapper
     namespace: ref
     table: postcode_mapper
@@ -184,6 +199,29 @@ contracts:
     required_columns: [survey_year, survey_type, reference, instance]
     notes:
       - "TODO: Add required mapping output columns when mapping contracts are finalised."
+
+
+
+  - identifier: intermediate.cell_number_mapped_responses
+    namespace: intermediate
+    table: cell_number_mapped_responses
+    description: Responses enriched with cell-number universe metadata.
+    layer: intermediate
+    owner: randd-data-platform
+    expected_grain: reference + instance + survey_type + survey_year
+    primary_key: null
+    partition_by: [survey_year, survey_type]
+    required_columns:
+      - survey_year
+      - survey_type
+      - reference
+      - instance
+      - cellno
+      - cellnumber
+      - uni_count
+      - uni_employment
+    notes:
+      - "First clean cell-number mapping seam only; not full legacy mapping."
 
   - identifier: intermediate.imputed_responses
     namespace: intermediate

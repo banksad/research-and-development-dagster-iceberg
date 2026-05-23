@@ -130,7 +130,7 @@ Required columns:
 
 ## 6) Synthetic fixture requirements
 
-Proposed future scenario directory (not added in this PR):
+Scenario directory now implemented:
 
 - `tests/fixtures/synthetic/scenarios/mapping_cell_number_minimal/`
 
@@ -183,3 +183,11 @@ Why this fixture is minimal/non-sensitive:
 ## Expected numerical equivalence statement for follow-on implementation PR
 
 For the first implemented cell-number seam, expected behaviour is row-level and value-level equivalence to legacy cell-number mapping at declared grain on shared synthetic fixtures. Any differences should be treated as defects unless explicitly approved as intentional changes.
+
+
+## Implementation note (May 2026)
+
+- The first clean cell-number mapping seam is now implemented in `src/randd_pipeline/domain/mapping/cell_number.py` with strict mapper canonicalisation and join validation.
+- A new explicit `ref/cell_number_mapper` asset materialises `ref.cell_number_mapper` by loading legacy-shaped CSV columns (`cell_no`, `UNI_Count`, `uni_employment`) and canonicalising to (`cellnumber`, `uni_count`, `uni_employment`).
+- A new `intermediate/cell_number_mapped_responses` asset materialises `intermediate.cell_number_mapped_responses` from `intermediate.mapped_responses` plus the canonical cell-number mapper table.
+- This remains a narrow seam implementation and is not a migration of `run_mapping(...)` or full legacy mapping stage port.

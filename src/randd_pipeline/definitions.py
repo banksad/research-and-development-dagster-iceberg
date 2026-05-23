@@ -11,7 +11,12 @@ from typing import Callable
 try:
     from dagster import Definitions
     from src.randd_pipeline.assets.inputs import raw_full_responses
-    from src.randd_pipeline.assets.mapping import mapped_responses, ultfoc_mapper
+    from src.randd_pipeline.assets.mapping import (
+        cell_number_mapped_responses,
+        cell_number_mapper,
+        mapped_responses,
+        ultfoc_mapper,
+    )
     from src.randd_pipeline.assets.staging import staged_responses
     from src.randd_pipeline.checks.raw_input_checks import (
         raw_full_responses_non_empty,
@@ -53,7 +58,14 @@ except ModuleNotFoundError:  # pragma: no cover - fallback for environments with
     _assets: list[Callable] = []
     _asset_checks: list[Callable] = []
 else:
-    _assets = [raw_full_responses, staged_responses, ultfoc_mapper, mapped_responses]
+    _assets = [
+        raw_full_responses,
+        staged_responses,
+        ultfoc_mapper,
+        mapped_responses,
+        cell_number_mapper,
+        cell_number_mapped_responses,
+    ]
     _asset_checks = [
         raw_full_responses_table_exists,
         raw_full_responses_non_empty,
