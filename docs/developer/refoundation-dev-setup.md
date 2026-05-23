@@ -96,3 +96,9 @@
 - Postcode/ITL mapping, PG conversion, cell-number mapping, PNP mapping, NI mapping, mapper file loading framework, and mapping QA outputs are deliberately out of scope for this thin vertical slice.
 - `mapped_responses` now has contract-backed checks for table existence, non-empty output, required columns, unique grain (`reference+instance+survey_type+survey_year`), and populated `ultfoc`.
 - These remain smoke/contract checks over the clean foreign-ownership seam; they are not full mapping QA and do not cover postcode/ITL, PG, cell-number, PNP, or NI mapping.
+
+## Staging-to-mapping chain smoke test
+
+- A synthetic in-process Dagster smoke test now validates the first connected refoundation slice: `staged_responses -> intermediate.staged_responses -> mapped_responses -> intermediate.mapped_responses`, including staged and mapped asset checks.
+- This remains synthetic fixture coverage and is **not** a full pipeline migration.
+- The following remain out of scope for this smoke path: raw snapshot ingestion, postcode/ITL mapping, product-group conversion, cell-number mapping, PNP area mapping, NI logic, imputation, estimation, and final outputs.

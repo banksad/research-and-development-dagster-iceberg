@@ -1,0 +1,15 @@
+scenario_id: staging_to_mapping_minimal
+description: Tiny synthetic chain fixture for staged_responses -> mapped_responses smoke test.
+owner: refoundation
+tags:
+  - synthetic
+  - staging
+  - mapping
+  - chain-smoke
+inputs:
+  - contributors.csv
+  - responses_long.csv
+  - ultfoc_mapper.csv
+expected_outputs:
+  - expected_staged_responses.csv
+  - expected_mapped_responses.csv
