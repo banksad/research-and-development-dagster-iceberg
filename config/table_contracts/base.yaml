@@ -190,15 +190,26 @@ contracts:
   - identifier: intermediate.mapped_responses
     namespace: intermediate
     table: mapped_responses
-    description: Responses enriched with mapping outputs.
+    description: Canonical mapped responses for the implemented production mapping scope. This includes foreign-ownership and cell-number mapping for v1.
     layer: intermediate
     owner: randd-pipeline
-    expected_grain: reference + instance + survey_year + survey_type
+    expected_grain: reference + instance + survey_type + survey_year
     primary_key: null
     partition_by: [survey_year, survey_type]
-    required_columns: [survey_year, survey_type, reference, instance]
+    required_columns:
+      - survey_year
+      - survey_type
+      - reference
+      - instance
+      - ultfoc
+      - cellno
+      - cellnumber
+      - uni_count
+      - uni_employment
     notes:
-      - "TODO: Add required mapping output columns when mapping contracts are finalised."
+      - "This contract leads the consolidation described in docs/architecture/0011-mapping-consolidation-plan.md."
+      - "During transition, runtime code may not yet populate the full contract until the consolidation implementation PR lands."
+      - "Temporary seam/checkpoint outputs such as intermediate.cell_number_mapped_responses remain transitional unless explicitly retained as debug assets."
 
 
 
