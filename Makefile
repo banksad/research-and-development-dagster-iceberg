@@ -7,6 +7,9 @@
 	help
 	prepare_docs_folder
 	requirements
+	requirements-dev
+	test-randd-pipeline
+	dagster-refoundation-dev
 
 .DEFAULT_GOAL := help
 
@@ -80,3 +83,17 @@ help:
 		printf "\n"; \
 	}' \
 	| more $(shell test $(shell uname) = Darwin && echo '--no-init --raw-control-chars')
+
+## Install combined legacy + refoundation development dependencies
+requirements-dev:
+	python -m pip install -U pip setuptools
+	python -m pip install -r requirements-dev.txt
+	pre-commit install
+
+## Run tests covering the lean refoundation package surface only
+test-randd-pipeline:
+	pytest tests/randd_pipeline
+
+## Run Dagster dev server for the lean refoundation definitions module
+dagster-refoundation-dev:
+	python -m dagster dev -m src.randd_pipeline.definitions
