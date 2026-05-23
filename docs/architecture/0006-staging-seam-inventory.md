@@ -207,10 +207,11 @@ deferred to follow-on PRs.
 ## 9) Implementation note: first thin staging asset
 
 A first thin staging smoke asset now exists at `src/randd_pipeline/assets/staging.py` as
-`staged_responses` (`intermediate/staged_responses` -> `intermediate.staged_responses`).
+`staged_responses` where Dagster asset key `intermediate/staged_responses` maps to Iceberg table identifier `intermediate.staged_responses`.
 
 The asset is intentionally a small wrapper over the clean transmutation seam
 (`build_full_responses(...)`) and deliberately does **not** port `run_staging`.
 
-Contract-backed checks for `intermediate.staged_responses` are intentionally deferred to a
-follow-on PR to keep this vertical slice narrow and implementation-sequenced.
+Contract-backed checks for `intermediate.staged_responses` are now implemented as the follow-on thin checks slice.
+
+Contract-backed checks for `intermediate.staged_responses` now exist and validate table existence, non-empty output, required columns from the refoundation table contract, and explicit uniqueness at `reference + instance + survey_type + survey_year`.
