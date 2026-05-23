@@ -22,6 +22,10 @@ This repository is a pandas-based reproducible analytical pipeline for producing
 5. Reuse existing config and schema validation logic for Dagster asset checks where possible.
 6. Keep migration steps reversible and explicit.
 
+## Branch-specific working mode (`lite-pipeline`)
+- On the `lite-pipeline` branch, larger PRs are explicitly allowed, including significant multi-file changes, to support the planned large-scale simplification refactor.
+- For this branch, prioritise coherent refactor batches over mobile-sized PRs, while still documenting assumptions, risks, rollback, and validation evidence.
+
 ## Numerical equivalence requirements
 - Any migration PR that changes orchestration or persistence must explicitly state expected numerical equivalence with the current pipeline.
 - For any changed pathway, add reconciliation evidence or checks comparing new-path outputs to current-path outputs.
