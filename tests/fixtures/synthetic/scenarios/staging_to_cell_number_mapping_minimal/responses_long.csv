@@ -1,0 +1,9 @@
+reference,instance,survey,period,questioncode,response,createdby,createddate,lastupdatedby,lastupdateddate,adjustedresponse
+SYN001,1,BERD,2025,601,100,resp,2026-01-05,resp,2026-01-06,0
+SYN001,1,BERD,2025,701,200,resp,2026-01-05,resp,2026-01-06,0
+SYN001,1,BERD,2025,cellno,101,resp,2026-01-05,resp,2026-01-06,0
+SYN002,1,BERD,2025,601,300,resp,2026-01-05,resp,2026-01-06,0
+SYN002,1,BERD,2025,701,400,resp,2026-01-05,resp,2026-01-06,0
+SYN002,1,BERD,2025,cellno,202,resp,2026-01-05,resp,2026-01-06,0
+SYN003,1,BERD,2025,601,500,resp,2026-01-05,resp,2026-01-06,0
+SYN003,1,BERD,2025,701,600,resp,2026-01-05,resp,2026-01-06,0
