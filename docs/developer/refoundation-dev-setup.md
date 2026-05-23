@@ -63,3 +63,9 @@
 - The smoke check then reads `raw.full_responses` back and compares it against the synthetic expected fixture.
 - This proves fixture loading plus local table-store persistence boundaries only; it is not a staging migration and not a business/statistical logic migration.
 - Follow-on assets should keep the same shape: implement a small domain/helper seam first, then add a thin Dagster asset wrapper over that seam.
+
+## First contract-backed raw input checks
+
+- The first contract-backed checks validate the materialised `raw.full_responses` table against `config/table_contracts/base.yaml`.
+- These checks currently cover table existence, non-empty rows, and required-column presence for `raw.full_responses`.
+- This remains input smoke/contract validation only; it is not staging migration and not business/statistical logic migration.
