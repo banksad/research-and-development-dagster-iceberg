@@ -61,3 +61,4 @@
 - The first refoundation smoke path materialises the synthetic `basic_responses/raw_full_responses.csv` fixture into the local `TableStore` as `raw.full_responses`.
 - The smoke check then reads `raw.full_responses` back and compares it against the synthetic expected fixture.
 - This proves fixture loading plus local table-store persistence boundaries only; it is not a staging migration and not a business/statistical logic migration.
+- Follow-on assets should keep the same shape: implement a small domain/helper seam first, then add a thin Dagster asset wrapper over that seam.
