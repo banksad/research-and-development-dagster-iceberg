@@ -893,6 +893,7 @@ data/processed/*
 
 # create exception for data folder in tests
 !tests/data/*/*.csv
+!tests/fixtures/synthetic/scenarios/**/*.csv
 
 # Ignore the `docs/reference/api` folder
 docs/reference/api/*

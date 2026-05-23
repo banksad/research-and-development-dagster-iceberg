@@ -1,0 +1,4 @@
+reference,instance,survey_type,survey_year,cellno,ultfoc,cellnumber,uni_count,uni_employment
+SYN001,1,BERD,2025,101,US,101,10,100
+SYN002,1,BERD,2025,202,GB,202,20,200
+SYN003,1,BERD,2025,,DE,,,
