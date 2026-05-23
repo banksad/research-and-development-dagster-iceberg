@@ -11,8 +11,10 @@ from src.randd_pipeline.io import refs
 from src.randd_pipeline.resources import TableStoreResource
 from tests.randd_pipeline.fixture_helpers import assert_frame_equal_sorted, scenario_path
 
-SCENARIO_ID = "staging_to_mapping_minimal"
+SCENARIO_ID = "staging_to_cell_number_mapping_minimal"
 STAGED_RESPONSES_ASSET_KEY = dagster.AssetKey(["intermediate", "staged_responses"])
+ULTFOC_MAPPER_ASSET_KEY = dagster.AssetKey(["ref", "ultfoc_mapper"])
+CELL_NUMBER_MAPPER_ASSET_KEY = dagster.AssetKey(["ref", "cell_number_mapper"])
 MAPPED_RESPONSES_ASSET_KEY = dagster.AssetKey(["intermediate", "mapped_responses"])
 
 
@@ -27,6 +29,7 @@ def _run_config() -> dict:
                 }
             },
             "ultfoc_mapper": {"config": {"ultfoc_mapper_csv_path": str(scenario / "ultfoc_mapper.csv")}},
+            "cell_number_mapper": {"config": {"cell_number_mapper_csv_path": str(scenario / "cell_number_mapper.csv")}},
         }
     }
 
@@ -36,11 +39,13 @@ def _build_defs(resource: TableStoreResource):
     mapping_mod = importlib.import_module("src.randd_pipeline.assets.mapping")
     staging_checks_mod = importlib.import_module("src.randd_pipeline.checks.staging_asset_checks")
     mapping_checks_mod = importlib.import_module("src.randd_pipeline.checks.mapping_asset_checks")
+    ref_checks_mod = importlib.import_module("src.randd_pipeline.checks.ref_asset_checks")
 
     return dagster.Definitions(
         assets=[
             getattr(staging_mod, "staged_responses"),
             getattr(mapping_mod, "ultfoc_mapper"),
+            getattr(mapping_mod, "cell_number_mapper"),
             getattr(mapping_mod, "mapped_responses"),
         ],
         asset_checks=[
@@ -53,12 +58,21 @@ def _build_defs(resource: TableStoreResource):
             getattr(mapping_checks_mod, "mapped_responses_required_columns"),
             getattr(mapping_checks_mod, "mapped_responses_unique_grain"),
             getattr(mapping_checks_mod, "mapped_responses_ultfoc_present"),
+            getattr(ref_checks_mod, "ultfoc_mapper_table_exists"),
+            getattr(ref_checks_mod, "ultfoc_mapper_non_empty"),
+            getattr(ref_checks_mod, "ultfoc_mapper_required_columns"),
+            getattr(ref_checks_mod, "ultfoc_mapper_unique_ruref"),
+            getattr(ref_checks_mod, "cell_number_mapper_table_exists"),
+            getattr(ref_checks_mod, "cell_number_mapper_non_empty"),
+            getattr(ref_checks_mod, "cell_number_mapper_required_columns"),
+            getattr(ref_checks_mod, "cell_number_mapper_unique_cellnumber"),
+            getattr(ref_checks_mod, "cell_number_mapper_cellnumber_range"),
         ],
         resources={"table_store": resource},
     )
 
 
-def test_staging_to_mapping_chain_materialises_tables_and_hits_expected_mapped_transition_check_state(tmp_path) -> None:
+def test_staging_to_mapping_chain_materialises_tables_and_passes_checks(tmp_path) -> None:
     scenario = scenario_path(SCENARIO_ID)
     resource = TableStoreResource(
         catalog_name="staging-to-mapping-chain-smoke",
@@ -76,20 +90,13 @@ def test_staging_to_mapping_chain_materialises_tables_and_hits_expected_mapped_t
     assert_frame_equal_sorted(actual_staged, expected_staged, sort_by=["reference", "instance", "survey_type", "survey_year"])
 
     actual_mapped = store.read_table_as_dataframe(refs.INTERMEDIATE_MAPPED_RESPONSES)
-    expected_mapped = pd.read_csv(scenario / "expected_mapped_responses.csv")
+    expected_mapped = pd.read_csv(scenario / "expected_cell_number_mapped_responses.csv")
     assert_frame_equal_sorted(actual_mapped, expected_mapped, sort_by=["reference", "instance", "survey_type", "survey_year"])
 
-    staged_checks_result = defs.get_asset_checks_def(STAGED_RESPONSES_ASSET_KEY).execute_in_process()
-    assert staged_checks_result.success
-
-    mapped_checks_result = defs.get_asset_checks_def(MAPPED_RESPONSES_ASSET_KEY).execute_in_process(raise_on_error=False)
-    assert not mapped_checks_result.success
-    mapped_messages = [e.event_specific_data.description for e in mapped_checks_result.get_asset_check_evaluations()]
-    # Intentional transition: canonical mapped_responses required-columns reflects v1 target
-    # while staging_to_mapping_minimal runtime output remains foreign-ownership-only for now.
-    assert any("Missing required columns" in m for m in mapped_messages)
-    assert not any("contains duplicate row(s)" in m for m in mapped_messages)
-    assert not any("null/blank" in m for m in mapped_messages)
+    assert defs.get_asset_checks_def(STAGED_RESPONSES_ASSET_KEY).execute_in_process().success
+    assert defs.get_asset_checks_def(ULTFOC_MAPPER_ASSET_KEY).execute_in_process().success
+    assert defs.get_asset_checks_def(CELL_NUMBER_MAPPER_ASSET_KEY).execute_in_process().success
+    assert defs.get_asset_checks_def(MAPPED_RESPONSES_ASSET_KEY).execute_in_process().success
 
     assert "src.pipeline" not in importlib.sys.modules
     assert not any(name == "src.staging" or name.startswith("src.staging.") for name in importlib.sys.modules)

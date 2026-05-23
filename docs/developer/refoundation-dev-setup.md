@@ -129,5 +129,5 @@
 ## Canonical mapped-output contract transition note
 
 - `intermediate.mapped_responses` is now the documented canonical mapped-output contract for the current implemented v1 mapping scope.
-- Runtime consolidation is still pending in a follow-up implementation PR; current runtime behavior may still materialize seam-by-seam intermediates first.
+- Runtime consolidation is now implemented: `mapped_responses` composes foreign-ownership and cell-number seams and materialises canonical `intermediate.mapped_responses`.
 - `intermediate.cell_number_mapped_responses` remains a temporary/checkpoint mapped table during this transition unless explicitly retained as a debug asset.

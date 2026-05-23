@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed.
+Implemented for v1 canonical mapping output (follow-up deprecation of checkpoint asset pending).
 
 ## Purpose
 
@@ -158,7 +158,8 @@ This planning PR does **not** implement those contract changes.
 
 - The canonical `intermediate.mapped_responses` table contract has now been updated ahead of runtime consolidation implementation.
 - This intentionally creates a short transition period where the contract documents the target v1 semantics while runtime behavior still reflects the current seam-by-seam implementation.
-- The next implementation PR should refactor `mapped_responses` to satisfy the expanded canonical contract.
+- Consolidation implementation has now landed: `mapped_responses` composes foreign-ownership and cell-number seams and satisfies the expanded canonical contract.
+- Remaining follow-up: mark and later deprecate `intermediate.cell_number_mapped_responses` as a checkpoint/debug asset.
 
 ## Test strategy
 

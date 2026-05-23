@@ -126,7 +126,14 @@ else:
 
         staged = store.read_table_as_dataframe(refs.INTERMEDIATE_STAGED_RESPONSES)
         ultfoc_mapper_df = store.read_table_as_dataframe(refs.REF_ULTFOC_MAPPER)
-        mapped = apply_foreign_ownership_mapping(staged_responses=staged, ultfoc_mapper=ultfoc_mapper_df)
+        foreign_ownership_mapped = apply_foreign_ownership_mapping(
+            staged_responses=staged, ultfoc_mapper=ultfoc_mapper_df
+        )
+        cell_number_mapper_df = store.read_table_as_dataframe(refs.REF_CELL_NUMBER_MAPPER)
+        mapped = apply_cell_number_mapping(
+            responses=foreign_ownership_mapped,
+            cell_number_mapper=cell_number_mapper_df,
+        )
 
         materialise_mapped_responses(store=store, df=mapped, overwrite=False)
 

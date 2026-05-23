@@ -15,27 +15,21 @@ from src.randd_pipeline.checks.mapping_checks import (
     check_mapped_responses_required_columns,
     check_mapped_responses_ultfoc_present,
     check_mapped_responses_unique_grain,
+    check_cell_number_mapped_responses_mapping_columns_present,
 )
 from tests.randd_pipeline.fixture_helpers import load_scenario_csv
 
 
 def _mapped_df() -> pd.DataFrame:
-    return load_scenario_csv("mapping_foreign_ownership_minimal", "expected_mapped_responses.csv")
+    return load_scenario_csv("mapping_cell_number_minimal", "expected_cell_number_mapped_responses.csv")
 
 
 def _cell_number_mapped_df() -> pd.DataFrame:
     return load_scenario_csv("mapping_cell_number_minimal", "expected_cell_number_mapped_responses.csv")
 
 
-def test_mapped_responses_required_columns_fail_for_foreign_ownership_transition_fixture() -> None:
-    # Intentional transition state: canonical intermediate.mapped_responses is now v1
-    # (foreign-ownership + cell-number columns), but current mapped_responses runtime
-    # still materialises the foreign-ownership seam until consolidation lands.
-    passed, message = check_mapped_responses_required_columns(_mapped_df())
-    assert not passed
-    assert "Missing required columns" in message
-    for column in ["cellno", "cellnumber", "uni_count", "uni_employment"]:
-        assert column in message
+def test_mapped_responses_required_columns_pass_for_canonical_v1_fixture() -> None:
+    assert check_mapped_responses_required_columns(_mapped_df())[0]
 
 
 @pytest.mark.parametrize("column", ["survey_year", "survey_type"])
@@ -140,3 +134,8 @@ def test_mapping_checks_module_does_not_import_legacy_modules() -> None:
         for name in importlib.sys.modules
         for prefix in banned_prefixes
     )
+
+
+def test_mapped_responses_cell_number_metadata_completeness_passes() -> None:
+    assert check_cell_number_mapped_responses_mapping_columns_present(_mapped_df())[0]
+

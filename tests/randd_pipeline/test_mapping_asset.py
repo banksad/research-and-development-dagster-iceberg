@@ -10,18 +10,20 @@ from src.randd_pipeline.io import refs
 from src.randd_pipeline.resources import TableStoreResource
 from tests.randd_pipeline.fixture_helpers import assert_frame_equal_sorted, scenario_path
 
-SCENARIO_ID = "mapping_foreign_ownership_minimal"
+SCENARIO_ID = "staging_to_cell_number_mapping_minimal"
 
 dagster = pytest.importorskip("dagster")
 MAPPED_RESPONSES_ASSET_KEY = dagster.AssetKey(["intermediate", "mapped_responses"])
 ULTFOC_MAPPER_ASSET_KEY = dagster.AssetKey(["ref", "ultfoc_mapper"])
+CELL_NUMBER_MAPPER_ASSET_KEY = dagster.AssetKey(["ref", "cell_number_mapper"])
 
 
 def _mapping_run_config() -> dict:
     scenario = scenario_path(SCENARIO_ID)
     return {
         "ops": {
-            "ultfoc_mapper": {"config": {"ultfoc_mapper_csv_path": str(scenario / "ultfoc_mapper.csv")}}
+            "ultfoc_mapper": {"config": {"ultfoc_mapper_csv_path": str(scenario / "ultfoc_mapper.csv")}},
+            "cell_number_mapper": {"config": {"cell_number_mapper_csv_path": str(scenario / "cell_number_mapper.csv")}}
         }
     }
 
@@ -38,7 +40,7 @@ def test_mapping_assets_use_explicit_layered_asset_keys() -> None:
 def test_mapped_responses_asset_materialises_fixture_to_local_table_store(tmp_path) -> None:
     scenario = scenario_path(SCENARIO_ID)
     staged_path = scenario / "staged_responses.csv"
-    expected_path = scenario / "expected_mapped_responses.csv"
+    expected_path = scenario / "expected_cell_number_mapped_responses.csv"
 
     resource = TableStoreResource(
         catalog_name="mapping-asset-smoke",
@@ -53,7 +55,9 @@ def test_mapped_responses_asset_materialises_fixture_to_local_table_store(tmp_pa
     mapped_responses_asset = getattr(mapping_mod, "mapped_responses")
     ultfoc_mapper_asset = getattr(mapping_mod, "ultfoc_mapper")
 
-    defs = dagster.Definitions(assets=[ultfoc_mapper_asset, mapped_responses_asset], resources={"table_store": resource})
+    cell_number_mapper_asset = getattr(mapping_mod, "cell_number_mapper")
+
+    defs = dagster.Definitions(assets=[ultfoc_mapper_asset, cell_number_mapper_asset, mapped_responses_asset], resources={"table_store": resource})
     result = defs.get_implicit_global_asset_job_def().execute_in_process(run_config=_mapping_run_config())
     assert result.success
 
@@ -78,7 +82,9 @@ def test_mapped_responses_asset_duplicate_materialisation_fails_when_table_exist
     mapped_responses_asset = getattr(mapping_mod, "mapped_responses")
     ultfoc_mapper_asset = getattr(mapping_mod, "ultfoc_mapper")
 
-    defs = dagster.Definitions(assets=[ultfoc_mapper_asset, mapped_responses_asset], resources={"table_store": resource})
+    cell_number_mapper_asset = getattr(mapping_mod, "cell_number_mapper")
+
+    defs = dagster.Definitions(assets=[ultfoc_mapper_asset, cell_number_mapper_asset, mapped_responses_asset], resources={"table_store": resource})
     run_config = _mapping_run_config()
 
     first_result = defs.get_implicit_global_asset_job_def().execute_in_process(run_config=run_config)
@@ -104,7 +110,9 @@ def test_mapping_asset_smoke_does_not_import_legacy_modules(tmp_path) -> None:
     mapped_responses_asset = getattr(mapping_mod, "mapped_responses")
     ultfoc_mapper_asset = getattr(mapping_mod, "ultfoc_mapper")
 
-    defs = dagster.Definitions(assets=[ultfoc_mapper_asset, mapped_responses_asset], resources={"table_store": resource})
+    cell_number_mapper_asset = getattr(mapping_mod, "cell_number_mapper")
+
+    defs = dagster.Definitions(assets=[ultfoc_mapper_asset, cell_number_mapper_asset, mapped_responses_asset], resources={"table_store": resource})
     result = defs.get_implicit_global_asset_job_def().execute_in_process(run_config=_mapping_run_config())
 
     assert result.success
