@@ -27,8 +27,15 @@ def _cell_number_mapped_df() -> pd.DataFrame:
     return load_scenario_csv("mapping_cell_number_minimal", "expected_cell_number_mapped_responses.csv")
 
 
-def test_mapped_responses_required_columns_pass_for_expected_fixture() -> None:
-    assert check_mapped_responses_required_columns(_mapped_df())[0]
+def test_mapped_responses_required_columns_fail_for_foreign_ownership_transition_fixture() -> None:
+    # Intentional transition state: canonical intermediate.mapped_responses is now v1
+    # (foreign-ownership + cell-number columns), but current mapped_responses runtime
+    # still materialises the foreign-ownership seam until consolidation lands.
+    passed, message = check_mapped_responses_required_columns(_mapped_df())
+    assert not passed
+    assert "Missing required columns" in message
+    for column in ["cellno", "cellnumber", "uni_count", "uni_employment"]:
+        assert column in message
 
 
 @pytest.mark.parametrize("column", ["survey_year", "survey_type"])
