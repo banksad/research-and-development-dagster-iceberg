@@ -191,3 +191,9 @@ For the first implemented cell-number seam, expected behaviour is row-level and 
 - A new explicit `ref/cell_number_mapper` asset materialises `ref.cell_number_mapper` by loading legacy-shaped CSV columns (`cell_no`, `UNI_Count`, `uni_employment`) and canonicalising to (`cellnumber`, `uni_count`, `uni_employment`).
 - A new `intermediate/cell_number_mapped_responses` asset materialises `intermediate.cell_number_mapped_responses` from `intermediate.mapped_responses` plus the canonical cell-number mapper table.
 - This remains a narrow seam implementation and is not a migration of `run_mapping(...)` or full legacy mapping stage port.
+
+## Implementation note (checks)
+- Contract-backed checks now exist for `ref.cell_number_mapper` and `intermediate.cell_number_mapped_responses`.
+- Null response `cellno` remains allowed.
+- Null/blank mapper `cellnumber` is invalid.
+- Non-null response `cellno` must map to `cellnumber`, `uni_count`, and `uni_employment`.

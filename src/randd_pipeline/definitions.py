@@ -24,6 +24,11 @@ try:
         raw_full_responses_table_exists,
     )
     from src.randd_pipeline.checks.mapping_asset_checks import (
+        cell_number_mapped_responses_mapping_columns_present,
+        cell_number_mapped_responses_non_empty,
+        cell_number_mapped_responses_required_columns,
+        cell_number_mapped_responses_table_exists,
+        cell_number_mapped_responses_unique_grain,
         mapped_responses_non_empty,
         mapped_responses_required_columns,
         mapped_responses_table_exists,
@@ -31,6 +36,11 @@ try:
         mapped_responses_unique_grain,
     )
     from src.randd_pipeline.checks.ref_asset_checks import (
+        cell_number_mapper_cellnumber_range,
+        cell_number_mapper_non_empty,
+        cell_number_mapper_required_columns,
+        cell_number_mapper_table_exists,
+        cell_number_mapper_unique_cellnumber,
         ultfoc_mapper_non_empty,
         ultfoc_mapper_required_columns,
         ultfoc_mapper_table_exists,
@@ -83,6 +93,16 @@ else:
         mapped_responses_required_columns,
         mapped_responses_unique_grain,
         mapped_responses_ultfoc_present,
+        cell_number_mapper_table_exists,
+        cell_number_mapper_non_empty,
+        cell_number_mapper_required_columns,
+        cell_number_mapper_unique_cellnumber,
+        cell_number_mapper_cellnumber_range,
+        cell_number_mapped_responses_table_exists,
+        cell_number_mapped_responses_non_empty,
+        cell_number_mapped_responses_required_columns,
+        cell_number_mapped_responses_unique_grain,
+        cell_number_mapped_responses_mapping_columns_present,
     ]
 
 

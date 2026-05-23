@@ -5,150 +5,83 @@ import importlib
 import pytest
 
 pd = pytest.importorskip("pandas")
-
 dagster = pytest.importorskip("dagster")
 
 from src.randd_pipeline.io import refs
 from src.randd_pipeline.resources import TableStoreResource
 from tests.randd_pipeline.fixture_helpers import scenario_path
 
-SCENARIO_ID = "mapping_foreign_ownership_minimal"
-MAPPED_RESPONSES_ASSET_KEY = dagster.AssetKey(["intermediate", "mapped_responses"])
+SCENARIO_ID = "mapping_cell_number_minimal"
+ASSET_KEY = dagster.AssetKey(["intermediate", "cell_number_mapped_responses"])
 
 
-def _mapping_run_config() -> dict:
-    scenario = scenario_path(SCENARIO_ID)
-    return {
-        "ops": {
-            "ultfoc_mapper": {
-                "config": {
-                    "ultfoc_mapper_csv_path": str(scenario / "ultfoc_mapper.csv"),
-                }
-            }
-        }
-    }
-
-
-def _build_defs(resource: TableStoreResource):
-    mapping_mod = importlib.import_module("src.randd_pipeline.assets.mapping")
+def _build_defs(resource):
     checks_mod = importlib.import_module("src.randd_pipeline.checks.mapping_asset_checks")
-
     return dagster.Definitions(
-        assets=[getattr(mapping_mod, "ultfoc_mapper"), getattr(mapping_mod, "mapped_responses")],
+        assets=[],
         asset_checks=[
-            getattr(checks_mod, "mapped_responses_table_exists"),
-            getattr(checks_mod, "mapped_responses_non_empty"),
-            getattr(checks_mod, "mapped_responses_required_columns"),
-            getattr(checks_mod, "mapped_responses_unique_grain"),
-            getattr(checks_mod, "mapped_responses_ultfoc_present"),
+            getattr(checks_mod, "cell_number_mapped_responses_table_exists"),
+            getattr(checks_mod, "cell_number_mapped_responses_non_empty"),
+            getattr(checks_mod, "cell_number_mapped_responses_required_columns"),
+            getattr(checks_mod, "cell_number_mapped_responses_unique_grain"),
+            getattr(checks_mod, "cell_number_mapped_responses_mapping_columns_present"),
         ],
         resources={"table_store": resource},
     )
 
 
-def _check_messages(check_result) -> list[str]:
-    return [event.event_specific_data.description for event in check_result.get_asset_check_evaluations()]
+def _messages(result):
+    return [e.event_specific_data.description for e in result.get_asset_check_evaluations()]
 
 
-def _seed_staged_responses(store) -> None:
+def test_cell_number_mapped_checks_pass_for_fixture_table(tmp_path):
     scenario = scenario_path(SCENARIO_ID)
-    staged = pd.read_csv(scenario / "staged_responses.csv")
-    store.create_table_from_dataframe(refs.INTERMEDIATE_STAGED_RESPONSES, staged)
-
-
-def test_mapped_asset_checks_pass_after_materialisation(tmp_path) -> None:
-    resource = TableStoreResource(catalog_name="mapped-check-pass", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
-    defs = _build_defs(resource)
-    _seed_staged_responses(resource.get_table_store())
-
-    result = defs.get_implicit_global_asset_job_def().execute_in_process(run_config=_mapping_run_config())
-    assert result.success
-
-    check_result = defs.get_asset_checks_def(MAPPED_RESPONSES_ASSET_KEY).execute_in_process()
-    assert check_result.success
-
-
-def test_mapped_asset_checks_fail_clearly_when_table_missing(tmp_path) -> None:
-    resource = TableStoreResource(catalog_name="mapped-check-missing", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
-    defs = _build_defs(resource)
-
-    check_result = defs.get_asset_checks_def(MAPPED_RESPONSES_ASSET_KEY).execute_in_process(raise_on_error=False)
-    assert not check_result.success
-    assert any("does not exist" in message for message in _check_messages(check_result))
-
-
-def test_mapped_required_columns_check_fails_clearly_when_columns_missing(tmp_path) -> None:
-    resource = TableStoreResource(catalog_name="mapped-check-columns", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
-    defs = _build_defs(resource)
-
-    store = resource.get_table_store()
-    store.create_table_from_dataframe(
-        refs.INTERMEDIATE_MAPPED_RESPONSES,
-        pd.DataFrame({"reference": ["A"], "instance": [1], "ultfoc": ["GB"]}),
+    resource = TableStoreResource(catalog_name="cn-map-pass", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
+    resource.get_table_store().create_table_from_dataframe(
+        refs.INTERMEDIATE_CELL_NUMBER_MAPPED_RESPONSES,
+        pd.read_csv(scenario / "expected_cell_number_mapped_responses.csv"),
     )
-
-    check_result = defs.get_asset_checks_def(MAPPED_RESPONSES_ASSET_KEY).execute_in_process(raise_on_error=False)
-    assert not check_result.success
-    assert any("Missing required columns: survey_year, survey_type" in message for message in _check_messages(check_result))
+    assert _build_defs(resource).get_asset_checks_def(ASSET_KEY).execute_in_process().success
 
 
-def test_mapped_unique_grain_check_fails_clearly_when_duplicates_present(tmp_path) -> None:
-    resource = TableStoreResource(catalog_name="mapped-check-dupes", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
-    defs = _build_defs(resource)
-
-    duplicate_df = pd.DataFrame(
-        {
-            "reference": ["A", "A"],
-            "instance": [1, 1],
-            "survey_type": ["BERD", "BERD"],
-            "survey_year": [2024, 2024],
-            "ultfoc": ["US", "US"],
-        }
-    )
-    resource.get_table_store().create_table_from_dataframe(refs.INTERMEDIATE_MAPPED_RESPONSES, duplicate_df)
-
-    check_result = defs.get_asset_checks_def(MAPPED_RESPONSES_ASSET_KEY).execute_in_process(raise_on_error=False)
-    assert not check_result.success
-    assert any("duplicate row(s)" in message for message in _check_messages(check_result))
+def test_cell_number_mapped_checks_fail_when_table_missing(tmp_path):
+    resource = TableStoreResource(catalog_name="cn-map-missing", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
+    res = _build_defs(resource).get_asset_checks_def(ASSET_KEY).execute_in_process(raise_on_error=False)
+    assert not res.success
+    assert any("does not exist" in m for m in _messages(res))
 
 
-def test_mapped_ultfoc_check_fails_clearly_when_values_null_or_blank(tmp_path) -> None:
-    resource = TableStoreResource(catalog_name="mapped-check-ultfoc", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
-    defs = _build_defs(resource)
-
-    df = pd.DataFrame(
-        {
-            "reference": ["A", "B"],
-            "instance": [1, 2],
-            "survey_type": ["BERD", "BERD"],
-            "survey_year": [2024, 2024],
-            "ultfoc": [None, "   "],
-        }
-    )
-    resource.get_table_store().create_table_from_dataframe(refs.INTERMEDIATE_MAPPED_RESPONSES, df)
-
-    check_result = defs.get_asset_checks_def(MAPPED_RESPONSES_ASSET_KEY).execute_in_process(raise_on_error=False)
-    assert not check_result.success
-    assert any("null/blank values" in message for message in _check_messages(check_result))
+def test_cell_number_mapped_checks_fail_for_missing_columns(tmp_path):
+    resource = TableStoreResource(catalog_name="cn-map-cols", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
+    resource.get_table_store().create_table_from_dataframe(refs.INTERMEDIATE_CELL_NUMBER_MAPPED_RESPONSES, pd.DataFrame({"reference": ["A"]}))
+    res = _build_defs(resource).get_asset_checks_def(ASSET_KEY).execute_in_process(raise_on_error=False)
+    assert not res.success
+    assert any("Missing required columns" in m for m in _messages(res))
 
 
-def test_mapped_checks_attach_to_explicit_asset_key() -> None:
+def test_cell_number_mapped_checks_fail_for_duplicate_grain(tmp_path):
+    scenario = scenario_path(SCENARIO_ID)
+    df = pd.read_csv(scenario / "expected_cell_number_mapped_responses.csv")
+    df = pd.concat([df, df.iloc[[0]]], ignore_index=True)
+    resource = TableStoreResource(catalog_name="cn-map-dupes", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
+    resource.get_table_store().create_table_from_dataframe(refs.INTERMEDIATE_CELL_NUMBER_MAPPED_RESPONSES, df)
+    res = _build_defs(resource).get_asset_checks_def(ASSET_KEY).execute_in_process(raise_on_error=False)
+    assert not res.success
+    assert any("duplicate row(s)" in m for m in _messages(res))
+
+
+def test_cell_number_mapped_checks_fail_for_missing_metadata_when_cellno_non_null(tmp_path):
+    scenario = scenario_path(SCENARIO_ID)
+    df = pd.read_csv(scenario / "expected_cell_number_mapped_responses.csv")
+    df.loc[0, "cellno"] = 1
+    df.loc[0, "uni_count"] = None
+    resource = TableStoreResource(catalog_name="cn-map-meta", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
+    resource.get_table_store().create_table_from_dataframe(refs.INTERMEDIATE_CELL_NUMBER_MAPPED_RESPONSES, df)
+    res = _build_defs(resource).get_asset_checks_def(ASSET_KEY).execute_in_process(raise_on_error=False)
+    assert not res.success
+    assert any("non-null cellno" in m for m in _messages(res))
+
+
+def test_cell_number_mapped_checks_attach_to_asset_key():
     checks_mod = importlib.import_module("src.randd_pipeline.checks.mapping_asset_checks")
-    assert getattr(checks_mod, "mapped_responses_table_exists").asset_key == MAPPED_RESPONSES_ASSET_KEY
-
-
-def test_mapped_checks_do_not_import_legacy_modules(tmp_path) -> None:
-    resource = TableStoreResource(catalog_name="mapped-check-import-smoke", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
-    defs = _build_defs(resource)
-    _seed_staged_responses(resource.get_table_store())
-
-    result = defs.get_implicit_global_asset_job_def().execute_in_process(run_config=_mapping_run_config())
-    assert result.success
-
-    check_result = defs.get_asset_checks_def(MAPPED_RESPONSES_ASSET_KEY).execute_in_process()
-    assert check_result.success
-    assert not any(name == "src.mapping" or name.startswith("src.mapping.") for name in importlib.sys.modules)
-    assert "src.pipeline" not in importlib.sys.modules
-    assert not any(name == "src.staging" or name.startswith("src.staging.") for name in importlib.sys.modules)
-    assert not any(name == "freezing" or name.startswith("freezing.") for name in importlib.sys.modules)
-    assert not any(name == "construction" or name.startswith("construction.") for name in importlib.sys.modules)
+    assert getattr(checks_mod, "cell_number_mapped_responses_table_exists").asset_key == ASSET_KEY

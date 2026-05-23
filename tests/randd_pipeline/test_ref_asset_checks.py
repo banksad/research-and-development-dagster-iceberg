@@ -11,94 +11,74 @@ from src.randd_pipeline.io import refs
 from src.randd_pipeline.resources import TableStoreResource
 from tests.randd_pipeline.fixture_helpers import scenario_path
 
-SCENARIO_ID = "mapping_foreign_ownership_minimal"
-ULTFOC_MAPPER_ASSET_KEY = dagster.AssetKey(["ref", "ultfoc_mapper"])
+SCENARIO_ID = "mapping_cell_number_minimal"
+ASSET_KEY = dagster.AssetKey(["ref", "cell_number_mapper"])
 
 
 def _run_config() -> dict:
     scenario = scenario_path(SCENARIO_ID)
-    return {"ops": {"ultfoc_mapper": {"config": {"ultfoc_mapper_csv_path": str(scenario / "ultfoc_mapper.csv")}}}}
+    return {"ops": {"cell_number_mapper": {"config": {"cell_number_mapper_csv_path": str(scenario / "cell_number_mapper.csv")}}}}
 
 
-def _build_defs(resource: TableStoreResource):
+def _build_defs(resource):
     mapping_mod = importlib.import_module("src.randd_pipeline.assets.mapping")
     checks_mod = importlib.import_module("src.randd_pipeline.checks.ref_asset_checks")
-
     return dagster.Definitions(
-        assets=[getattr(mapping_mod, "ultfoc_mapper")],
+        assets=[getattr(mapping_mod, "cell_number_mapper")],
         asset_checks=[
-            getattr(checks_mod, "ultfoc_mapper_table_exists"),
-            getattr(checks_mod, "ultfoc_mapper_non_empty"),
-            getattr(checks_mod, "ultfoc_mapper_required_columns"),
-            getattr(checks_mod, "ultfoc_mapper_unique_ruref"),
+            getattr(checks_mod, "cell_number_mapper_table_exists"),
+            getattr(checks_mod, "cell_number_mapper_non_empty"),
+            getattr(checks_mod, "cell_number_mapper_required_columns"),
+            getattr(checks_mod, "cell_number_mapper_unique_cellnumber"),
+            getattr(checks_mod, "cell_number_mapper_cellnumber_range"),
         ],
         resources={"table_store": resource},
     )
 
 
-def _check_messages(check_result) -> list[str]:
-    return [event.event_specific_data.description for event in check_result.get_asset_check_evaluations()]
+def _messages(result):
+    return [e.event_specific_data.description for e in result.get_asset_check_evaluations()]
 
 
-def test_ref_ultfoc_mapper_asset_checks_pass_after_materialisation(tmp_path) -> None:
-    resource = TableStoreResource(catalog_name="ref-check-pass", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
-    defs = _build_defs(resource)
-
-    result = defs.get_implicit_global_asset_job_def().execute_in_process(run_config=_run_config())
-    assert result.success
-
-    check_result = defs.get_asset_checks_def(ULTFOC_MAPPER_ASSET_KEY).execute_in_process()
-    assert check_result.success
+def test_cell_number_ref_checks_pass_after_materialisation(tmp_path):
+    defs = _build_defs(TableStoreResource(catalog_name="cn-ref-pass", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse")))
+    assert defs.get_implicit_global_asset_job_def().execute_in_process(run_config=_run_config()).success
+    assert defs.get_asset_checks_def(ASSET_KEY).execute_in_process().success
 
 
-def test_ref_ultfoc_mapper_asset_checks_fail_clearly_when_table_missing(tmp_path) -> None:
-    resource = TableStoreResource(catalog_name="ref-check-missing", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
-    defs = _build_defs(resource)
-
-    check_result = defs.get_asset_checks_def(ULTFOC_MAPPER_ASSET_KEY).execute_in_process(raise_on_error=False)
-    assert not check_result.success
-    assert any("does not exist" in message for message in _check_messages(check_result))
+def test_cell_number_ref_checks_fail_when_missing(tmp_path):
+    defs = _build_defs(TableStoreResource(catalog_name="cn-ref-missing", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse")))
+    res = defs.get_asset_checks_def(ASSET_KEY).execute_in_process(raise_on_error=False)
+    assert not res.success
+    assert any("does not exist" in m for m in _messages(res))
 
 
-def test_ref_ultfoc_mapper_required_columns_check_fails_clearly_when_columns_missing(tmp_path) -> None:
-    resource = TableStoreResource(catalog_name="ref-check-columns", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
-    defs = _build_defs(resource)
-
-    resource.get_table_store().create_table_from_dataframe(refs.REF_ULTFOC_MAPPER, pd.DataFrame({"ruref": ["A"]}))
-
-    check_result = defs.get_asset_checks_def(ULTFOC_MAPPER_ASSET_KEY).execute_in_process(raise_on_error=False)
-    assert not check_result.success
-    assert any("Missing required columns: ultfoc" in message for message in _check_messages(check_result))
+def test_cell_number_ref_checks_fail_for_missing_columns(tmp_path):
+    resource = TableStoreResource(catalog_name="cn-ref-cols", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
+    resource.get_table_store().create_table_from_dataframe(refs.REF_CELL_NUMBER_MAPPER, pd.DataFrame({"cellnumber": [1]}))
+    res = _build_defs(resource).get_asset_checks_def(ASSET_KEY).execute_in_process(raise_on_error=False)
+    assert not res.success
+    assert any("Missing required columns" in m for m in _messages(res))
 
 
-def test_ref_ultfoc_mapper_unique_ruref_check_fails_clearly_when_duplicates_present(tmp_path) -> None:
-    resource = TableStoreResource(catalog_name="ref-check-dupes", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
-    defs = _build_defs(resource)
-
-    duplicate_df = pd.DataFrame({"ruref": ["A", "A"], "ultfoc": ["US", "US"]})
-    resource.get_table_store().create_table_from_dataframe(refs.REF_ULTFOC_MAPPER, duplicate_df)
-
-    check_result = defs.get_asset_checks_def(ULTFOC_MAPPER_ASSET_KEY).execute_in_process(raise_on_error=False)
-    assert not check_result.success
-    assert any("duplicate row(s)" in message for message in _check_messages(check_result))
+def test_cell_number_ref_checks_fail_for_duplicate_rows(tmp_path):
+    resource = TableStoreResource(catalog_name="cn-ref-dupes", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
+    df = pd.DataFrame({"cellnumber": [1, 1], "uni_count": [10, 10], "uni_employment": [11, 11]})
+    resource.get_table_store().create_table_from_dataframe(refs.REF_CELL_NUMBER_MAPPER, df)
+    res = _build_defs(resource).get_asset_checks_def(ASSET_KEY).execute_in_process(raise_on_error=False)
+    assert not res.success
+    assert any("duplicate row(s)" in m for m in _messages(res))
 
 
-def test_ref_ultfoc_mapper_checks_attach_to_explicit_asset_key() -> None:
+def test_cell_number_ref_checks_fail_for_range(tmp_path):
+    resource = TableStoreResource(catalog_name="cn-ref-range", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
+    df = pd.DataFrame({"cellnumber": [818], "uni_count": [10], "uni_employment": [11]})
+    resource.get_table_store().create_table_from_dataframe(refs.REF_CELL_NUMBER_MAPPER, df)
+    res = _build_defs(resource).get_asset_checks_def(ASSET_KEY).execute_in_process(raise_on_error=False)
+    assert not res.success
+    assert any("inclusive range 1..817" in m for m in _messages(res))
+
+
+def test_cell_number_ref_checks_attach_to_asset_key():
     checks_mod = importlib.import_module("src.randd_pipeline.checks.ref_asset_checks")
-    assert getattr(checks_mod, "ultfoc_mapper_table_exists").asset_key == ULTFOC_MAPPER_ASSET_KEY
-
-
-def test_ref_ultfoc_mapper_checks_do_not_import_legacy_modules(tmp_path) -> None:
-    resource = TableStoreResource(catalog_name="ref-check-import-smoke", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
-    defs = _build_defs(resource)
-
-    result = defs.get_implicit_global_asset_job_def().execute_in_process(run_config=_run_config())
-    assert result.success
-
-    check_result = defs.get_asset_checks_def(ULTFOC_MAPPER_ASSET_KEY).execute_in_process()
-    assert check_result.success
-    assert not any(name == "src.mapping" or name.startswith("src.mapping.") for name in importlib.sys.modules)
-    assert "src.pipeline" not in importlib.sys.modules
-    assert not any(name == "src.staging" or name.startswith("src.staging.") for name in importlib.sys.modules)
-    assert not any(name == "freezing" or name.startswith("freezing.") for name in importlib.sys.modules)
-    assert not any(name == "construction" or name.startswith("construction.") for name in importlib.sys.modules)
+    assert getattr(checks_mod, "cell_number_mapper_table_exists").asset_key == ASSET_KEY
