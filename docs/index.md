@@ -11,4 +11,6 @@ self
 ./aqa/README.md
 ./structure/README.md
 ./reference/README.md
+./architecture/0001-dagster-iceberg-target-architecture.md
+./architecture/0002-migration-principles.md
 ```
