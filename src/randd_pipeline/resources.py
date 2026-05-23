@@ -5,9 +5,51 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal
 
-from src.randd_pipeline.io.catalog_config import CatalogConfig
+from src.randd_pipeline.io.catalog_config import CatalogConfig, local_sql_catalog_config
 from src.randd_pipeline.io.iceberg import LocalPyIcebergTableStore
 from src.randd_pipeline.io.table_store import TableStore
+
+
+def _normalise_catalog_config(
+    *,
+    catalog_name: str,
+    catalog_type: Literal["local_sql", "rest"],
+    warehouse: str | None,
+    uri: str | None,
+    properties: dict[str, str],
+) -> CatalogConfig:
+    """Normalise resource fields into a catalog config for store construction."""
+
+    if catalog_type == "local_sql":
+        if warehouse is None:
+            raise ValueError("local_sql catalog requires a warehouse path")
+
+        base_config = local_sql_catalog_config(catalog_name, warehouse)
+        normalised_properties = dict(base_config.properties)
+
+        # Keep explicit URI overrides for dev/test when provided by callers.
+        if uri is not None:
+            normalised_properties["uri"] = uri
+
+        normalised_properties.update(properties)
+
+        resolved_uri = normalised_properties.get("uri", base_config.uri)
+
+        return CatalogConfig(
+            name=base_config.name,
+            type=base_config.type,
+            warehouse=base_config.warehouse,
+            uri=resolved_uri,
+            properties=normalised_properties,
+        )
+
+    return CatalogConfig(
+        name=catalog_name,
+        type=catalog_type,
+        warehouse=warehouse,
+        uri=uri,
+        properties=dict(properties),
+    )
 
 
 try:
@@ -25,12 +67,12 @@ except ModuleNotFoundError:  # pragma: no cover - fallback for environments with
         properties: dict[str, str] = field(default_factory=dict)
 
         def get_table_store(self) -> TableStore:
-            config = CatalogConfig(
-                name=self.catalog_name,
-                type=self.catalog_type,
+            config = _normalise_catalog_config(
+                catalog_name=self.catalog_name,
+                catalog_type=self.catalog_type,
                 warehouse=self.warehouse,
                 uri=self.uri,
-                properties=dict(self.properties),
+                properties=self.properties,
             )
 
             if self.catalog_type == "local_sql":
@@ -54,12 +96,12 @@ else:
         def get_table_store(self) -> TableStore:
             """Construct a table-store instance from resource configuration."""
 
-            config = CatalogConfig(
-                name=self.catalog_name,
-                type=self.catalog_type,
+            config = _normalise_catalog_config(
+                catalog_name=self.catalog_name,
+                catalog_type=self.catalog_type,
                 warehouse=self.warehouse,
                 uri=self.uri,
-                properties=dict(self.properties),
+                properties=self.properties,
             )
 
             if self.catalog_type == "local_sql":
