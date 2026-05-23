@@ -919,3 +919,6 @@ add_ssh_key.bat
 
 # ~HEAD filter
 *~HEAD
+
+!requirements-dev.txt
+!requirements-refoundation.txt
