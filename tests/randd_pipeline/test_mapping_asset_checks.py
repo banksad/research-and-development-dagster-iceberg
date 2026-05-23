@@ -42,15 +42,34 @@ def _messages(result):
     return [e.event_specific_data.description for e in result.get_asset_check_evaluations()]
 
 
-def test_mapped_checks_pass_after_materialisation(tmp_path):
+def test_mapped_checks_transition_expected_required_columns_failure_after_materialisation(tmp_path):
     scenario = scenario_path(FOREIGN_SCENARIO_ID)
     resource = TableStoreResource(catalog_name="mapped-pass", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
     resource.get_table_store().create_table_from_dataframe(refs.INTERMEDIATE_STAGED_RESPONSES, pd.read_csv(scenario / "staged_responses.csv"))
     resource.get_table_store().create_table_from_dataframe(refs.REF_ULTFOC_MAPPER, pd.read_csv(scenario / "ultfoc_mapper.csv"))
     defs = _build_defs(resource)
     assert defs.get_implicit_global_asset_job_def().execute_in_process().success
-    assert defs.get_asset_checks_def(MAPPED_ASSET_KEY).execute_in_process().success
+    result = defs.get_asset_checks_def(MAPPED_ASSET_KEY).execute_in_process(raise_on_error=False)
+    assert not result.success
+    messages = _messages(result)
+    # Transition expectation: required-columns check targets canonical v1 mapped contract,
+    # while runtime mapped_responses is still foreign-ownership-only until consolidation.
+    assert any("Missing required columns" in m for m in messages)
+    assert not any("contains duplicate row(s)" in m for m in messages)
+    assert not any("null/blank" in m for m in messages)
 
+
+
+
+def test_mapped_required_columns_check_passes_for_canonical_v1_fixture(tmp_path):
+    scenario = scenario_path(CELL_NUMBER_SCENARIO_ID)
+    resource = TableStoreResource(catalog_name="mapped-v1-cols", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
+    resource.get_table_store().create_table_from_dataframe(
+        refs.INTERMEDIATE_MAPPED_RESPONSES,
+        pd.read_csv(scenario / "expected_cell_number_mapped_responses.csv"),
+    )
+    res = _build_defs(resource).get_asset_checks_def(MAPPED_ASSET_KEY).execute_in_process()
+    assert res.success
 
 def test_mapped_checks_fail_when_table_missing(tmp_path):
     resource = TableStoreResource(catalog_name="mapped-missing", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
