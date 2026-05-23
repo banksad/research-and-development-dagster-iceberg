@@ -62,6 +62,27 @@ def test_table_store_resource_rest_raises_not_implemented_without_network_calls(
         raise AssertionError("Expected NotImplementedError for REST catalog type")
 
 
+
+
+def test_table_store_resource_defaults_properties_to_empty_dict(tmp_path):
+    resource = TableStoreResource(
+        catalog_name="local-dev",
+        catalog_type="local_sql",
+        warehouse=str(tmp_path),
+    )
+
+    assert resource.properties == {}
+
+
+def test_randd_pipeline_modules_import_without_production_config_or_endpoints():
+    import importlib
+
+    resources_mod = importlib.import_module("src.randd_pipeline.resources")
+    definitions_mod = importlib.import_module("src.randd_pipeline.definitions")
+
+    assert hasattr(resources_mod, "TableStoreResource")
+    assert hasattr(definitions_mod, "defs")
+
 def test_table_store_resource_local_sql_has_no_production_endpoint_or_credentials(tmp_path):
     resource = TableStoreResource(
         catalog_name="local-dev",
