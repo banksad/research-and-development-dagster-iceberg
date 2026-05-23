@@ -206,3 +206,16 @@ Explicitly not implemented in this PR:
 - Cell-number mapping.
 - Mapper file loading.
 - Mapping QA CSV outputs.
+
+## 9) Implementation note (PR 028)
+
+A first thin mapping Dagster smoke asset now exists in `src/randd_pipeline/assets/mapping.py`.
+
+Scope of this asset:
+- Wraps the clean foreign ownership seam only (`apply_foreign_ownership_mapping(...)`).
+- Reads `intermediate.staged_responses` from `TableStore` and materialises `intermediate.mapped_responses`.
+
+Deliberate non-goals of this PR:
+- Does not port or wrap `run_mapping`.
+- Does not include postcode/ITL, PG conversion, cell-number, PNP, or NI mapping branches.
+- Contract-backed checks for `intermediate.mapped_responses` are deferred to a follow-on PR.
