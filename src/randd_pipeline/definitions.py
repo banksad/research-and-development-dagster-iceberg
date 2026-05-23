@@ -25,6 +25,12 @@ try:
         mapped_responses_ultfoc_present,
         mapped_responses_unique_grain,
     )
+    from src.randd_pipeline.checks.ref_asset_checks import (
+        ultfoc_mapper_non_empty,
+        ultfoc_mapper_required_columns,
+        ultfoc_mapper_table_exists,
+        ultfoc_mapper_unique_ruref,
+    )
     from src.randd_pipeline.checks.staging_asset_checks import (
         staged_responses_non_empty,
         staged_responses_required_columns,
@@ -56,6 +62,10 @@ else:
         staged_responses_non_empty,
         staged_responses_required_columns,
         staged_responses_unique_grain,
+        ultfoc_mapper_table_exists,
+        ultfoc_mapper_non_empty,
+        ultfoc_mapper_required_columns,
+        ultfoc_mapper_unique_ruref,
         mapped_responses_table_exists,
         mapped_responses_non_empty,
         mapped_responses_required_columns,
