@@ -40,3 +40,11 @@
 - Production deployment is expected to use a lakehouse microservice/catalog-service configuration, likely REST-compatible.
 - Docker packaging for Google Cloud / Artifact Registry is intended later in the rollout, but is not implemented in this change.
 - No production endpoints, credentials, or secrets are stored in the repository for this setup.
+
+## TableStore resource boundary
+
+- `src/randd_pipeline/resources.py::TableStoreResource` is the future Dagster resource boundary for table persistence.
+- The currently implemented backing mode is `local_sql` only, intended for local development and test usage.
+- `rest` / lakehouse-service configuration is represented for forward compatibility, but intentionally raises `NotImplementedError` in the current scaffold.
+- Future lean Dagster assets should depend on `TableStoreResource` / `TableStore` abstractions rather than importing PyIceberg APIs directly.
+
