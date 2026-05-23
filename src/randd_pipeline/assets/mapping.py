@@ -9,6 +9,10 @@ from typing import Any
 import pandas as pd
 
 from src.randd_pipeline.domain.mapping.foreign_ownership import apply_foreign_ownership_mapping
+from src.randd_pipeline.domain.mapping.cell_number import (
+    apply_cell_number_mapping,
+    canonicalise_cell_number_mapper,
+)
 from src.randd_pipeline.io import refs
 from src.randd_pipeline.io.table_store import TableStore
 from src.randd_pipeline.resources import TableStoreResource
@@ -30,6 +34,20 @@ class UltfocMapperConfig:
         return cls(ultfoc_mapper_csv_path=str(ultfoc_mapper_csv_path))
 
 
+@dataclass(frozen=True)
+class CellNumberMapperConfig:
+    cell_number_mapper_csv_path: str
+
+    @classmethod
+    def from_mapping(cls, config: dict[str, Any]) -> "CellNumberMapperConfig":
+        cell_number_mapper_csv_path = config.get("cell_number_mapper_csv_path")
+        if not cell_number_mapper_csv_path:
+            raise ValueError(
+                "cell_number_mapper asset requires config key 'cell_number_mapper_csv_path'"
+            )
+        return cls(cell_number_mapper_csv_path=str(cell_number_mapper_csv_path))
+
+
 def load_ultfoc_mapper_from_csv(path: str | Path) -> pd.DataFrame:
     """Load foreign-ownership mapper fixture with minimal structural validation."""
 
@@ -44,6 +62,10 @@ def load_ultfoc_mapper_from_csv(path: str | Path) -> pd.DataFrame:
     return df
 
 
+def load_cell_number_mapper_from_csv(path: str | Path) -> pd.DataFrame:
+    return pd.read_csv(path)
+
+
 def materialise_ultfoc_mapper(store: TableStore, df: pd.DataFrame, overwrite: bool = False) -> None:
     """Materialise ultfoc mapper to ``ref.ultfoc_mapper``."""
 
@@ -54,6 +76,20 @@ def materialise_mapped_responses(store: TableStore, df: pd.DataFrame, overwrite:
     """Materialise mapped responses to ``intermediate.mapped_responses``."""
 
     store.create_table_from_dataframe(refs.INTERMEDIATE_MAPPED_RESPONSES, df, overwrite=overwrite)
+
+
+def materialise_cell_number_mapper(store: TableStore, df: pd.DataFrame, overwrite: bool = False) -> None:
+    store.create_table_from_dataframe(refs.REF_CELL_NUMBER_MAPPER, df, overwrite=overwrite)
+
+
+def materialise_cell_number_mapped_responses(
+    store: TableStore, df: pd.DataFrame, overwrite: bool = False
+) -> None:
+    store.create_table_from_dataframe(
+        refs.INTERMEDIATE_CELL_NUMBER_MAPPED_RESPONSES,
+        df,
+        overwrite=overwrite,
+    )
 
 
 try:
@@ -96,6 +132,38 @@ else:
 
         return {
             "table": refs.INTERMEDIATE_MAPPED_RESPONSES,
+            "row_count": int(len(mapped)),
+            "column_count": int(len(mapped.columns)),
+        }
+
+    @asset(
+        key=AssetKey(["ref", "cell_number_mapper"]),
+        config_schema={"cell_number_mapper_csv_path": str},
+    )
+    def cell_number_mapper(context, table_store: TableStoreResource) -> dict[str, Any]:
+        config = CellNumberMapperConfig.from_mapping(context.op_config)
+        store = table_store.get_table_store()
+        raw_mapper = load_cell_number_mapper_from_csv(config.cell_number_mapper_csv_path)
+        mapper = canonicalise_cell_number_mapper(raw_mapper)
+        materialise_cell_number_mapper(store=store, df=mapper, overwrite=False)
+        return {
+            "table": refs.REF_CELL_NUMBER_MAPPER,
+            "row_count": int(len(mapper)),
+            "column_count": int(len(mapper.columns)),
+        }
+
+    @asset(key=AssetKey(["intermediate", "cell_number_mapped_responses"]))
+    def cell_number_mapped_responses(table_store: TableStoreResource) -> dict[str, Any]:
+        store = table_store.get_table_store()
+        mapped_responses_df = store.read_table_as_dataframe(refs.INTERMEDIATE_MAPPED_RESPONSES)
+        mapper_df = store.read_table_as_dataframe(refs.REF_CELL_NUMBER_MAPPER)
+        mapped = apply_cell_number_mapping(
+            responses=mapped_responses_df,
+            cell_number_mapper=mapper_df,
+        )
+        materialise_cell_number_mapped_responses(store=store, df=mapped, overwrite=False)
+        return {
+            "table": refs.INTERMEDIATE_CELL_NUMBER_MAPPED_RESPONSES,
             "row_count": int(len(mapped)),
             "column_count": int(len(mapped.columns)),
         }

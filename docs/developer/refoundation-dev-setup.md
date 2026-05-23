@@ -112,3 +112,8 @@
 - `ref.ultfoc_mapper` now has contract-backed checks for table existence, non-empty output, required columns, and unique `ruref`.
 - These are reference-input checks for the first foreign ownership mapping seam only.
 - They are not a general reference-data validation framework.
+
+## Cell-number seam note
+
+- A first clean cell-number seam now exists via `ref/cell_number_mapper` and `intermediate/cell_number_mapped_responses` using synthetic fixtures and canonicalised mapper columns.
+- This is still not a full mapping migration: postcode/ITL, PG conversion, PNP, NI, and broader `run_mapping` behaviour remain out of scope.
