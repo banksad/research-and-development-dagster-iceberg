@@ -137,3 +137,11 @@
 - `mapped_responses` is now the production-facing v1 mapping output.
 - `mapped_responses_cell_number_mapping_complete` is registered in the default Dagster definitions for canonical `intermediate.mapped_responses`.
 - `cell_number_mapped_responses` is no longer required in the default production-facing mapping chain and is treated as checkpoint/debug-only pending final deprecation/removal.
+
+## First imputation seam note
+
+- A first minimal imputation seam now exists from `intermediate.mapped_responses` to `intermediate.imputed_responses`.
+- The implemented seam is intentionally narrow: simple class-mean/TMI-style imputation for a synthetic target column with explicit markers.
+- This is not a full legacy imputation migration.
+- MoR, backdata, manual trimming, short-form expansion, and carry-forward behaviours remain out of scope in this slice.
+- `intermediate.imputed_responses` is now the next production-facing stage after `intermediate.mapped_responses` for the lean v1 chain.

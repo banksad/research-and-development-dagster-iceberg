@@ -1,0 +1,6 @@
+reference,instance,survey_type,survey_year,ultfoc,cellno,cellnumber,uni_count,uni_employment,status,imp_class,601,601_imputed,imp_marker
+SYN001,1,BERD,2024,2,10,10,100,1000,clear,A,10,10,not_imputed
+SYN002,1,BERD,2024,2,11,11,120,1200,responding,A,20,20,not_imputed
+SYN003,1,BERD,2024,3,12,12,130,1300,impute,A,,15,TMI
+SYN004,1,BERD,2024,3,13,13,90,900,impute,B,,,no_mean_found
+SYN005,1,BERD,2024,1,14,14,80,800,clear,C,40,40,not_imputed
