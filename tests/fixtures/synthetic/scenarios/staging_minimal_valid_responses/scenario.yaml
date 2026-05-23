@@ -1,0 +1,12 @@
+scenario_id: staging_minimal_valid_responses
+description: Tiny synthetic contributors+responses fixture for staging transmutation seam.
+owner: refoundation
+tags:
+  - synthetic
+  - staging
+  - transmutation
+inputs:
+  - contributors.csv
+  - responses_long.csv
+expected_outputs:
+  - expected_full_responses.csv

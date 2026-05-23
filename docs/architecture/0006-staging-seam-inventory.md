@@ -184,3 +184,15 @@ For the first extraction seam PR (transmutation helpers), expected outcome is:
 - with differences treated as defects unless explicitly approved.
 
 Reconciliation should be recorded at row/column grain for `expected_full_responses` fixture outputs.
+
+## 8) Implementation note: first staging transmutation seam
+
+The first refoundation-domain staging seam has now been implemented under
+`src/randd_pipeline/domain/staging/transmutation.py` using tiny synthetic fixtures.
+
+This implementation is a clean re-expression of deterministic contributor/response
+transmutation behaviour (merge + long-to-wide pivot) and is intentionally **not** a
+port of `run_staging`.
+
+Dagster asset wiring and Iceberg materialisation for staging are intentionally
+deferred to follow-on PRs.
