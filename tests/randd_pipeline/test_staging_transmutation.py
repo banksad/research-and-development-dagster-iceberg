@@ -11,6 +11,7 @@ from src.randd_pipeline.domain.staging.transmutation import (
     DEFAULT_KEY_COLUMNS,
     LEGACY_KEY_COLUMNS,
     build_full_responses,
+    canonicalise_staging_columns,
     create_contextual_dataframe,
     create_response_dataframe,
 )
@@ -34,6 +35,67 @@ def test_build_full_responses_matches_expected_fixture() -> None:
         expected,
         sort_by=["reference", "instance", "survey_type", "survey_year"],
     )
+
+
+def test_canonicalise_staging_columns_legacy_shape_to_canonical_shape() -> None:
+    legacy = pd.DataFrame(
+        {"reference": ["SYN001"], "survey": ["BERD"], "period": [2025], "instance": [1]}
+    )
+
+    actual = canonicalise_staging_columns(legacy)
+    expected = pd.DataFrame(
+        {
+            "reference": ["SYN001"],
+            "survey_type": ["BERD"],
+            "survey_year": [2025],
+            "instance": [1],
+        }
+    )
+
+    assert_frame_equal(actual, expected)
+
+
+def test_canonicalise_staging_columns_accepts_already_canonical_shape() -> None:
+    canonical = pd.DataFrame(
+        {
+            "reference": ["SYN001"],
+            "survey_type": ["BERD"],
+            "survey_year": [2025],
+            "instance": [1],
+        }
+    )
+
+    actual = canonicalise_staging_columns(canonical)
+
+    assert_frame_equal(actual, canonical)
+
+
+def test_canonicalise_staging_columns_rejects_ambiguous_survey_columns() -> None:
+    ambiguous = pd.DataFrame(
+        {
+            "reference": ["SYN001"],
+            "survey": ["BERD"],
+            "survey_type": ["BERD"],
+            "period": [2025],
+        }
+    )
+
+    with pytest.raises(ValueError, match="ambiguous survey columns present"):
+        canonicalise_staging_columns(ambiguous)
+
+
+def test_canonicalise_staging_columns_rejects_ambiguous_period_columns() -> None:
+    ambiguous = pd.DataFrame(
+        {
+            "reference": ["SYN001"],
+            "survey": ["BERD"],
+            "period": [2025],
+            "survey_year": [2025],
+        }
+    )
+
+    with pytest.raises(ValueError, match="ambiguous period columns present"):
+        canonicalise_staging_columns(ambiguous)
 
 
 def test_build_full_responses_drops_metadata_columns() -> None:

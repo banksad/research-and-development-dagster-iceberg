@@ -50,10 +50,27 @@ def canonicalise_staging_columns(
     survey_column: str = "survey",
     period_column: str = "period",
 ) -> pd.DataFrame:
-    canonicalised = df.rename(
-        columns={survey_column: "survey_type", period_column: "survey_year"}
-    )
-    return canonicalised
+    has_legacy_survey = survey_column in df.columns
+    has_canonical_survey = "survey_type" in df.columns
+    has_legacy_period = period_column in df.columns
+    has_canonical_period = "survey_year" in df.columns
+
+    if has_legacy_survey and has_canonical_survey:
+        raise ValueError(
+            f"ambiguous survey columns present: '{survey_column}' and 'survey_type'"
+        )
+    if has_legacy_period and has_canonical_period:
+        raise ValueError(
+            f"ambiguous period columns present: '{period_column}' and 'survey_year'"
+        )
+
+    rename_map: dict[str, str] = {}
+    if has_legacy_survey:
+        rename_map[survey_column] = "survey_type"
+    if has_legacy_period:
+        rename_map[period_column] = "survey_year"
+
+    return df.rename(columns=rename_map)
 
 
 def build_full_responses(
