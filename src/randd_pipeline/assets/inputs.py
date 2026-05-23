@@ -65,7 +65,12 @@ except ModuleNotFoundError:  # pragma: no cover - dagster optional in this packa
     pass
 
 else:
-    @asset(config_schema={"csv_path": str})
+    from dagster import AssetKey
+
+    @asset(
+        key=AssetKey(["raw", "full_responses"]),
+        config_schema={"csv_path": str},
+    )
     def raw_full_responses(
         context,
         table_store: TableStoreResource,
