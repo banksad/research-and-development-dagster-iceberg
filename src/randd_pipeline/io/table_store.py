@@ -22,10 +22,15 @@ class TableStore(Protocol):
         df: pd.DataFrame,
         overwrite: bool = False,
     ) -> None:
-        """Create table from DataFrame, optionally replacing existing table."""
+        """Create a new table from ``df``.
+
+        The default behaviour is non-mutating: if ``identifier`` already exists,
+        implementations should raise ``ValueError`` unless ``overwrite=True`` is
+        explicitly requested.
+        """
 
     def append_dataframe(self, identifier: str, df: pd.DataFrame) -> None:
-        """Append DataFrame rows to an existing table."""
+        """Append rows to an existing table as an explicit append-only write path."""
 
     def read_table_as_dataframe(self, identifier: str) -> pd.DataFrame:
         """Read table contents into a pandas DataFrame."""
