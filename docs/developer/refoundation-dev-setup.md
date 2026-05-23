@@ -73,3 +73,11 @@
 - The first contract-backed checks validate the materialised `raw.full_responses` table against `config/table_contracts/base.yaml`.
 - These checks currently cover table existence, non-empty rows, and required-column presence for `raw.full_responses`.
 - This remains input smoke/contract validation only; it is not staging migration and not business/statistical logic migration.
+
+
+## First staging transmutation smoke path
+
+- The first staging smoke asset materialises the clean staging transmutation seam to `intermediate.staged_responses`.
+- This proves thin Dagster asset orchestration wired to domain seam execution and `TableStore` materialisation.
+- It is intentionally **not** a full staging migration and **not** a `run_staging` port.
+- Postcode validation, mapper loading, manual files, freezing, and construction concepts remain deliberately out of scope for this first vertical slice.

@@ -202,3 +202,15 @@ direction rather than blind preservation of legacy column names.
 
 Dagster asset wiring and Iceberg materialisation for staging are intentionally
 deferred to follow-on PRs.
+
+
+## 9) Implementation note: first thin staging asset
+
+A first thin staging smoke asset now exists at `src/randd_pipeline/assets/staging.py` as
+`staged_responses` (`intermediate/staged_responses` -> `intermediate.staged_responses`).
+
+The asset is intentionally a small wrapper over the clean transmutation seam
+(`build_full_responses(...)`) and deliberately does **not** port `run_staging`.
+
+Contract-backed checks for `intermediate.staged_responses` are intentionally deferred to a
+follow-on PR to keep this vertical slice narrow and implementation-sequenced.

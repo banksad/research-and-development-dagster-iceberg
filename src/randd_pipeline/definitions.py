@@ -11,6 +11,7 @@ from typing import Callable
 try:
     from dagster import Definitions
     from src.randd_pipeline.assets.inputs import raw_full_responses
+    from src.randd_pipeline.assets.staging import staged_responses
     from src.randd_pipeline.checks.raw_input_checks import (
         raw_full_responses_non_empty,
         raw_full_responses_required_columns,
@@ -32,7 +33,7 @@ except ModuleNotFoundError:  # pragma: no cover - fallback for environments with
     _assets: list[Callable] = []
     _asset_checks: list[Callable] = []
 else:
-    _assets = [raw_full_responses]
+    _assets = [raw_full_responses, staged_responses]
     _asset_checks = [
         raw_full_responses_table_exists,
         raw_full_responses_non_empty,
