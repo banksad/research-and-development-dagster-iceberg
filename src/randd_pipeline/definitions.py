@@ -10,6 +10,7 @@ from typing import Callable
 
 try:
     from dagster import Definitions
+    from src.randd_pipeline.assets.inputs import raw_full_responses
 except ModuleNotFoundError:  # pragma: no cover - fallback for environments without dagster
     class Definitions:  # type: ignore[override]
         """Lightweight fallback so this module remains importable without Dagster."""
@@ -18,5 +19,9 @@ except ModuleNotFoundError:  # pragma: no cover - fallback for environments with
             self.assets = assets or []
 
 
-# Future assets will be added as the lean refoundation is implemented.
-defs = Definitions(assets=[])
+    _assets: list[Callable] = []
+else:
+    _assets = [raw_full_responses]
+
+
+defs = Definitions(assets=_assets)
