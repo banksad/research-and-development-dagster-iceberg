@@ -75,8 +75,35 @@ A `.secrets` file with the [required secrets and
 To install the Python requirements, open your terminal and enter:
 
 ```shell
+python -m pip install --upgrade pip setuptools wheel
 pip install -r requirements.txt
 ```
+
+### Troubleshooting dependency errors when running tests
+
+If `pytest` fails with `ModuleNotFoundError: No module named 'rdsa_utils'`, your
+environment is missing the dependencies from `requirements.txt`. Reinstalling
+from the requirements file should resolve this:
+
+```shell
+pip install -r requirements.txt
+```
+
+If `pytest` then fails with `ModuleNotFoundError: No module named 'pyarrow'`, this
+also indicates your local environment is only partially provisioned. The same
+requirements installation command above should install `pyarrow`.
+
+If `pip install -r requirements.txt` fails during `numpy==1.24.4` build setup with
+an error like `Cannot import 'setuptools.build_meta'`, your environment is missing
+`setuptools`. Install bootstrap packaging tools first:
+
+```shell
+python -m pip install --upgrade pip setuptools wheel
+```
+
+To avoid dependency drift, prefer a fresh virtual environment (or conda
+environment) and install all project requirements in one step, rather than
+installing individual packages ad hoc.
 
 ### Update the environment yaml
 
