@@ -187,3 +187,22 @@ Phased intent:
 ## Expected numerical equivalence statement for follow-on implementation PR
 
 For each extracted mapping seam, expected behaviour is numerical/row-level equivalence to legacy logic on shared synthetic fixtures at declared grain; any differences are defects unless explicitly approved as intentional design changes.
+
+## 8) Implementation note (PR 027)
+
+The first clean mapping-domain seam is now implemented in `src/randd_pipeline/domain/mapping/foreign_ownership.py` as a pandas-only function operating on provided dataframes.
+
+Scope implemented in this PR:
+- GB-side foreign ownership mapping only (`reference` -> `ultfoc` via mapper `ruref`).
+- Explicit defaulting to `GB` for missing/blank/null mapped ownership.
+- Row-count and declared grain preservation (`reference + instance + survey_type + survey_year`) validated with tiny synthetic fixtures.
+
+Explicitly not implemented in this PR:
+- `run_mapping` migration or wrappering.
+- NI mapping branch logic.
+- PNP area mapping.
+- Postcode/ITL mapping.
+- Product-group conversion.
+- Cell-number mapping.
+- Mapper file loading.
+- Mapping QA CSV outputs.

@@ -1,0 +1,7 @@
+scenario_id: mapping_foreign_ownership_minimal
+description: Minimal synthetic fixture for GB-side foreign ownership mapping seam.
+inputs:
+  - staged_responses.csv
+  - ultfoc_mapper.csv
+expected_outputs:
+  - expected_mapped_responses.csv
