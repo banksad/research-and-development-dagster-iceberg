@@ -15,6 +15,14 @@ from tests.randd_pipeline.fixture_helpers import (
 SCENARIO_ID = "basic_responses"
 
 dagster = pytest.importorskip("dagster")
+RAW_FULL_RESPONSES_ASSET_KEY = dagster.AssetKey(["raw", "full_responses"])
+
+
+def test_raw_full_responses_asset_uses_explicit_layered_asset_key() -> None:
+    inputs_mod = importlib.import_module("src.randd_pipeline.assets.inputs")
+    raw_full_responses_asset = getattr(inputs_mod, "raw_full_responses")
+
+    assert raw_full_responses_asset.key == RAW_FULL_RESPONSES_ASSET_KEY
 
 
 def test_raw_full_responses_asset_materialises_fixture_to_local_table_store(tmp_path) -> None:

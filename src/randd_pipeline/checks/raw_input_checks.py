@@ -21,7 +21,18 @@ except ModuleNotFoundError:  # pragma: no cover - dagster optional in this packa
     pass
 
 else:
-    @asset_check(asset=refs.RAW_FULL_RESPONSES, name="table_exists")
+    from dagster import AssetKey
+
+    def _table_identifier_to_asset_key(table_identifier: str) -> AssetKey:
+        """Convert ``namespace.table`` identifiers to Dagster layer/name asset keys."""
+
+        namespace, name = table_identifier.split(".", maxsplit=1)
+        return AssetKey([namespace, name])
+
+
+    _RAW_FULL_RESPONSES_ASSET_KEY = _table_identifier_to_asset_key(refs.RAW_FULL_RESPONSES)
+
+    @asset_check(asset=_RAW_FULL_RESPONSES_ASSET_KEY, name="table_exists")
     def raw_full_responses_table_exists(table_store: TableStoreResource) -> AssetCheckResult:
         """Check that ``raw.full_responses`` exists in the configured table store."""
 
@@ -34,7 +45,7 @@ else:
         return AssetCheckResult(passed=False, description="Table raw.full_responses does not exist.")
 
 
-    @asset_check(asset=refs.RAW_FULL_RESPONSES, name="non_empty")
+    @asset_check(asset=_RAW_FULL_RESPONSES_ASSET_KEY, name="non_empty")
     def raw_full_responses_non_empty(table_store: TableStoreResource) -> AssetCheckResult:
         """Check that ``raw.full_responses`` contains at least one row."""
 
@@ -50,7 +61,7 @@ else:
         return AssetCheckResult(passed=passed, description=message)
 
 
-    @asset_check(asset=refs.RAW_FULL_RESPONSES, name="required_columns")
+    @asset_check(asset=_RAW_FULL_RESPONSES_ASSET_KEY, name="required_columns")
     def raw_full_responses_required_columns(table_store: TableStoreResource) -> AssetCheckResult:
         """Check that ``raw.full_responses`` matches contract required-column expectations."""
 

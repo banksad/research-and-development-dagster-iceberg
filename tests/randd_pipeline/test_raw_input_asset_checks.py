@@ -12,6 +12,7 @@ from tests.randd_pipeline.fixture_helpers import scenario_path
 SCENARIO_ID = "basic_responses"
 
 dagster = pytest.importorskip("dagster")
+RAW_FULL_RESPONSES_ASSET_KEY = dagster.AssetKey(["raw", "full_responses"])
 
 
 def _build_defs(resource: TableStoreResource):
@@ -44,7 +45,7 @@ def test_raw_full_responses_asset_checks_pass_after_materialisation(tmp_path) ->
     )
     assert result.success
 
-    check_result = defs.get_asset_checks_def("raw_full_responses").execute_in_process()
+    check_result = defs.get_asset_checks_def(RAW_FULL_RESPONSES_ASSET_KEY).execute_in_process()
     assert check_result.success
 
 
@@ -56,7 +57,7 @@ def test_raw_full_responses_asset_checks_fail_clearly_when_table_is_missing(tmp_
     )
     defs = _build_defs(resource)
 
-    check_result = defs.get_asset_checks_def("raw_full_responses").execute_in_process(raise_on_error=False)
+    check_result = defs.get_asset_checks_def(RAW_FULL_RESPONSES_ASSET_KEY).execute_in_process(raise_on_error=False)
 
     assert not check_result.success
     messages = [event.event_specific_data.description for event in check_result.get_asset_check_evaluations()]
@@ -77,7 +78,7 @@ def test_raw_full_responses_required_columns_check_fails_clearly_when_columns_mi
         load_raw_full_responses_from_csv(scenario_path(SCENARIO_ID) / "raw_full_responses.csv").drop(columns=["instance"]),
     )
 
-    check_result = defs.get_asset_checks_def("raw_full_responses").execute_in_process(raise_on_error=False)
+    check_result = defs.get_asset_checks_def(RAW_FULL_RESPONSES_ASSET_KEY).execute_in_process(raise_on_error=False)
 
     assert not check_result.success
     messages = [event.event_specific_data.description for event in check_result.get_asset_check_evaluations()]
@@ -98,7 +99,19 @@ def test_raw_input_checks_do_not_import_legacy_pipeline_or_staging_modules(tmp_p
     )
     assert result.success
 
-    check_result = defs.get_asset_checks_def("raw_full_responses").execute_in_process()
+    check_result = defs.get_asset_checks_def(RAW_FULL_RESPONSES_ASSET_KEY).execute_in_process()
     assert check_result.success
     assert "src.pipeline" not in importlib.sys.modules
     assert not any(name == "src.staging" or name.startswith("src.staging.") for name in importlib.sys.modules)
+
+
+def test_raw_full_responses_asset_checks_attach_to_explicit_layered_asset_key(tmp_path) -> None:
+    resource = TableStoreResource(
+        catalog_name="raw-input-check-key",
+        catalog_type="local_sql",
+        warehouse=str(tmp_path / "warehouse"),
+    )
+    defs = _build_defs(resource)
+
+    check_def = defs.get_asset_checks_def(RAW_FULL_RESPONSES_ASSET_KEY)
+    assert check_def is not None
