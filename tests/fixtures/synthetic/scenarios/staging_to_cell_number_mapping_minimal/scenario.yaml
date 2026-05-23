@@ -1,0 +1,18 @@
+scenario_id: staging_to_cell_number_mapping_minimal
+description: Tiny synthetic chain fixture for staged_responses -> mapped_responses -> cell_number_mapped_responses smoke test.
+owner: refoundation
+tags:
+  - synthetic
+  - staging
+  - mapping
+  - cell-number
+  - chain-smoke
+inputs:
+  - contributors.csv
+  - responses_long.csv
+  - ultfoc_mapper.csv
+  - cell_number_mapper.csv
+expected_outputs:
+  - expected_staged_responses.csv
+  - expected_mapped_responses.csv
+  - expected_cell_number_mapped_responses.csv
