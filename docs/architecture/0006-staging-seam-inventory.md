@@ -194,5 +194,10 @@ This implementation is a clean re-expression of deterministic contributor/respon
 transmutation behaviour (merge + long-to-wide pivot) and is intentionally **not** a
 port of `run_staging`.
 
+For this seam, legacy snapshot input terminology (`survey`, `period`) is treated as
+input-shape compatibility only, while refoundation outputs are canonicalised to
+`survey_type` and `survey_year`. This naming contract is explicit refoundation
+direction rather than blind preservation of legacy column names.
+
 Dagster asset wiring and Iceberg materialisation for staging are intentionally
 deferred to follow-on PRs.

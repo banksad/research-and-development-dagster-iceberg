@@ -9,6 +9,7 @@ from pandas.testing import assert_frame_equal
 
 from src.randd_pipeline.domain.staging.transmutation import (
     DEFAULT_KEY_COLUMNS,
+    LEGACY_KEY_COLUMNS,
     build_full_responses,
     create_contextual_dataframe,
     create_response_dataframe,
@@ -31,7 +32,7 @@ def test_build_full_responses_matches_expected_fixture() -> None:
     assert_frame_equal_sorted(
         actual,
         expected,
-        sort_by=["reference", "instance", "survey", "period"],
+        sort_by=["reference", "instance", "survey_type", "survey_year"],
     )
 
 
@@ -53,6 +54,10 @@ def test_build_full_responses_has_clear_target_grain_and_no_instance_suffix_colu
 
     assert "instance_x" not in actual.columns
     assert "instance_y" not in actual.columns
+    assert "survey_type" in actual.columns
+    assert "survey_year" in actual.columns
+    assert "survey" not in actual.columns
+    assert "period" not in actual.columns
     assert not actual.duplicated(subset=DEFAULT_KEY_COLUMNS).any()
 
 
@@ -72,7 +77,7 @@ def test_build_full_responses_raises_clear_error_for_missing_keys() -> None:
     contributors = load_scenario_csv(SCENARIO_ID, "contributors.csv").drop(columns=["survey"])
     responses = load_scenario_csv(SCENARIO_ID, "responses_long.csv")
 
-    with pytest.raises(ValueError, match="contributors is missing required columns: survey"):
+    with pytest.raises(ValueError, match="contributors is missing required columns: survey_type"):
         build_full_responses(contributors=contributors, responses=responses)
 
 
@@ -99,12 +104,12 @@ def test_create_functions_operate_on_merged_fixture() -> None:
 
     merged = contributors.drop(columns=["createdby", "createddate", "lastupdatedby"]).merge(
         responses.drop(columns=["createdby", "createddate", "lastupdatedby", "lastupdateddate", "adjustedresponse"]),
-        on=DEFAULT_KEY_COLUMNS,
+        on=LEGACY_KEY_COLUMNS,
         how="outer",
     )
 
-    response_df = create_response_dataframe(merged, key_columns=DEFAULT_KEY_COLUMNS)
-    contextual_df = create_contextual_dataframe(merged, key_columns=DEFAULT_KEY_COLUMNS)
+    response_df = create_response_dataframe(merged, key_columns=LEGACY_KEY_COLUMNS)
+    contextual_df = create_contextual_dataframe(merged, key_columns=LEGACY_KEY_COLUMNS)
 
     assert {"reference", "instance", "survey", "period", 601, 701}.issubset(set(response_df.columns))
     assert "questioncode" not in contextual_df.columns
@@ -143,8 +148,8 @@ def test_duplicate_responses_use_first_value_for_same_key_and_questioncode() -> 
     syn001_row = actual.loc[
         (actual["reference"] == "SYN001")
         & (actual["instance"] == 1)
-        & (actual["survey"] == "BERD")
-        & (actual["period"] == 2025)
+        & (actual["survey_type"] == "BERD")
+        & (actual["survey_year"] == 2025)
     ].iloc[0]
 
     assert syn001_row[601] == 100
