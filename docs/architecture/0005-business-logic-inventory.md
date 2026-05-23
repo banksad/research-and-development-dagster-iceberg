@@ -71,3 +71,7 @@
 - No real data, secrets, credentials, production paths, or private datasets.
 - Use synthetic fixtures and golden tests.
 - Do not rewrite statistical formulas unless explicitly approved.
+
+## Migration note (2026-05-23)
+- Initial lean refoundation package scaffold has been introduced at `src/randd_pipeline/` as the target implementation location for new Dagster definitions, domain transforms, checks, and Iceberg I/O contracts.
+- This scaffold intentionally contains naming contracts and import smoke-test surfaces only; no business/statistical logic migration is included in this step.
