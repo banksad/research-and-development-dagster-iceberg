@@ -13,4 +13,5 @@ self
 ./reference/README.md
 ./architecture/0001-dagster-iceberg-target-architecture.md
 ./architecture/0002-migration-principles.md
+./architecture/0004-freezing-construction-deprecation-plan.md
 ```
