@@ -66,6 +66,15 @@ else:
         passed, message = check_mapped_responses_ultfoc_present(df)
         return AssetCheckResult(passed=passed, description=message)
 
+
+    @asset_check(asset=_MAPPED_RESPONSES_ASSET_KEY, name="cell_number_mapping_complete")
+    def mapped_responses_cell_number_mapping_complete(table_store: TableStoreResource) -> AssetCheckResult:
+        df, missing = _read_or_missing(table_store, refs.INTERMEDIATE_MAPPED_RESPONSES, "cell-number mapped metadata")
+        if missing:
+            return missing
+        passed, message = check_cell_number_mapped_responses_mapping_columns_present(df)
+        return AssetCheckResult(passed=passed, description=message)
+
     @asset_check(asset=_CELL_NUMBER_MAPPED_ASSET_KEY, name="table_exists")
     def cell_number_mapped_responses_table_exists(table_store: TableStoreResource) -> AssetCheckResult:
         exists = table_store.get_table_store().table_exists(refs.INTERMEDIATE_CELL_NUMBER_MAPPED_RESPONSES)
