@@ -1,0 +1,5 @@
+survey_year,survey_type,reference,instance,postcode,formtype,status,value
+2099,SYNTH,REF001,1,ZZ1 1ZZ,A,OK,100
+2099,SYNTH,REF002,1,ZZ2 2ZZ,B,PENDING,0
+2099,SYNTH,REF003,2,ZZ3 3ZZ,A,OK,250
+2099,SYNTH,REF004,1,ZZ4 4ZZ,C,VOID,0

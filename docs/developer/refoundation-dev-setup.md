@@ -48,3 +48,10 @@
 - `rest` / lakehouse-service configuration is represented for forward compatibility, but intentionally raises `NotImplementedError` in the current scaffold.
 - Future lean Dagster assets should depend on `TableStoreResource` / `TableStore` abstractions rather than importing PyIceberg APIs directly.
 
+
+## Synthetic fixtures and parity harness
+
+- Synthetic migration fixtures live under `tests/fixtures/synthetic/`.
+- Use these fixtures to run small, deterministic legacy-vs-refoundation comparisons during pathway migration.
+- Each scenario should include concise metadata (`scenario.yaml`) and tiny, human-readable CSV extracts.
+- Keep fixture data non-sensitive and obviously synthetic; never commit real or production data.

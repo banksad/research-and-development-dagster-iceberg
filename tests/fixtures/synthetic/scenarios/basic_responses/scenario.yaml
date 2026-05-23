@@ -1,0 +1,16 @@
+scenario_id: basic_responses
+description: Tiny synthetic response rows for migration parity harness checks.
+purpose: Provide a deterministic, human-readable baseline fixture for future legacy-vs-refoundation comparisons.
+tables_extracts_included:
+  - raw.full_responses
+affected_files:
+  - raw_full_responses.csv
+  - expected_raw_full_responses.csv
+expected_grain: one row per (survey_year, survey_type, reference, instance)
+business_rules_exercised:
+  - Stable schema presence for raw.full_responses key columns
+  - Deterministic parity comparison against expected rows
+sensitivity: synthetic_non_sensitive
+notes:
+  - This fixture is synthetic and contains no production or personal data.
+  - Values and identifiers are intentionally unrealistic.
