@@ -1,6 +1,6 @@
 # 0003: Refoundation strategy — lean Dagster/Iceberg pipeline
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-05-23
 - **Supersedes direction of:** conservative wrapper-first migration notes
 
@@ -39,3 +39,6 @@ Adopt a **lean refoundation** strategy:
 - Sequence into small, reviewable PRs.
 - Keep old and new pathways side-by-side only as long as needed to establish parity.
 - Remove/deprecate legacy components once equivalent behavior is covered by tests/checks.
+
+## Supersession note
+Any existing wrapper-style Dagster scaffold (including placeholder assets mirroring legacy stage boundaries) is **legacy scaffolding** and is superseded by this accepted lean refoundation direction. New implementation work should target the future lean package (`src/randd_pipeline/`), not extend wrapper-style orchestration around `src/pipeline.py`.
