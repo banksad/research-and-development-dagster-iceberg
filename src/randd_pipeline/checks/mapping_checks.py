@@ -82,12 +82,13 @@ def check_cell_number_mapped_responses_mapping_columns_present(df: pd.DataFrame)
 
     non_null_cellno = ~df["cellno"].isna()
     scoped = df.loc[non_null_cellno, ["cellnumber", "uni_count", "uni_employment"]]
-    missing_mapped = scoped.isna().any(axis=1).sum()
-    if int(missing_mapped) > 0:
+    as_text = scoped.astype("string")
+    missing_mapped = scoped.isna().any(axis=1) | as_text.apply(lambda col: col.str.strip().eq(""), axis=0).any(axis=1)
+    if int(missing_mapped.sum()) > 0:
         return (
             False,
             "Rows with non-null cellno must include cellnumber, uni_count, and uni_employment; "
-            f"found {int(missing_mapped)} violating row(s).",
+            f"found {int(missing_mapped.sum())} violating row(s).",
         )
 
     return (
