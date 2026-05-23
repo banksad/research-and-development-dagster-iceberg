@@ -237,15 +237,17 @@ contracts:
   - identifier: intermediate.imputed_responses
     namespace: intermediate
     table: imputed_responses
-    description: Responses after imputation transformations.
+    description: Responses after minimal v1 imputation seam transformations.
     layer: intermediate
     owner: randd-methodology
     expected_grain: reference + instance + survey_year + survey_type
     primary_key: null
     partition_by: [survey_year, survey_type]
-    required_columns: [survey_year, survey_type, reference, instance]
+    required_columns: [survey_year, survey_type, reference, instance, imp_marker, 601_imputed]
     notes:
-      - "TODO: Confirm imputation-status markers required for QA checks."
+      - "Minimal v1 imputation seam."
+      - "Currently proves simple class-mean/TMI-style imputation only."
+      - "Full legacy MoR, carry-forward, manual trimming, short-form expansion, and backdata output are not implemented here."
 
   - identifier: intermediate.outlier_adjusted_responses
     namespace: intermediate

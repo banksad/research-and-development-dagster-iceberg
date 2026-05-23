@@ -278,3 +278,26 @@ Suggested behaviour:
 - No tests changed.
 - No assets/checks/contracts changed.
 - Draft PR should target `develop`.
+
+## 12. Implementation status update (minimal seam landed)
+
+A first minimal clean imputation seam has now landed in the lean refoundation runtime:
+
+- Domain function: `apply_simple_tmi_imputation(...)` in `src/randd_pipeline/domain/imputation/simple_tmi.py`.
+- Asset: `intermediate/imputed_responses` materialised from `intermediate.mapped_responses`.
+- Behaviour: deterministic simple class-mean imputation for a single synthetic numeric target (`601`) with marker output (`imp_marker`).
+- Markers currently used: `not_imputed`, `TMI`, `no_mean_found`.
+- Contract/check coverage now includes required columns, non-empty, unique grain, marker population, and illegal missing-imputed-value detection.
+
+What this implementation does **not** include:
+
+- Full legacy `run_imputation` migration.
+- MoR/carry-forward, backdata output generation, manual trimming integration.
+- Short-form expansion, apportionment, outlier/estimation/output-stage behaviour.
+
+Follow-up areas:
+
+1. Expand target-variable coverage beyond the single synthetic seam column.
+2. Design explicit production config/parameter surface for method controls.
+3. Introduce parity reconciliation harness outputs against legacy oracle behaviour per enabled method.
+4. Add later seams for MoR/carry-forward and manual-trim flows via explicit input tables.

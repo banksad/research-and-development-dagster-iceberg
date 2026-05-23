@@ -1,0 +1,4 @@
+scenario_id: mapping_to_imputation_minimal
+name: Minimal mapping-to-imputation seam scenario
+notes:
+  - Tiny synthetic fixture proving deterministic simple class-mean imputation seam.

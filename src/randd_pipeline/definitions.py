@@ -11,6 +11,7 @@ from typing import Callable
 try:
     from dagster import Definitions
     from src.randd_pipeline.assets.inputs import raw_full_responses
+    from src.randd_pipeline.assets.imputation import imputed_responses
     from src.randd_pipeline.assets.mapping import (
         cell_number_mapper,
         mapped_responses,
@@ -21,6 +22,14 @@ try:
         raw_full_responses_non_empty,
         raw_full_responses_required_columns,
         raw_full_responses_table_exists,
+    )
+    from src.randd_pipeline.checks.imputation_asset_checks import (
+        imputed_responses_imputation_marker_populated,
+        imputed_responses_no_illegal_missing_imputed_values,
+        imputed_responses_non_empty,
+        imputed_responses_required_columns,
+        imputed_responses_table_exists,
+        imputed_responses_unique_grain,
     )
     from src.randd_pipeline.checks.mapping_asset_checks import (
         mapped_responses_non_empty,
@@ -68,6 +77,7 @@ else:
         staged_responses,
         ultfoc_mapper,
         mapped_responses,
+        imputed_responses,
         cell_number_mapper,
     ]
     _asset_checks = [
@@ -88,6 +98,12 @@ else:
         mapped_responses_unique_grain,
         mapped_responses_ultfoc_present,
         mapped_responses_cell_number_mapping_complete,
+        imputed_responses_table_exists,
+        imputed_responses_non_empty,
+        imputed_responses_required_columns,
+        imputed_responses_unique_grain,
+        imputed_responses_imputation_marker_populated,
+        imputed_responses_no_illegal_missing_imputed_values,
         cell_number_mapper_table_exists,
         cell_number_mapper_non_empty,
         cell_number_mapper_required_columns,
