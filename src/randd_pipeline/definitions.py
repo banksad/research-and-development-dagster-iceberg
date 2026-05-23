@@ -18,6 +18,13 @@ try:
         raw_full_responses_required_columns,
         raw_full_responses_table_exists,
     )
+    from src.randd_pipeline.checks.mapping_asset_checks import (
+        mapped_responses_non_empty,
+        mapped_responses_required_columns,
+        mapped_responses_table_exists,
+        mapped_responses_ultfoc_present,
+        mapped_responses_unique_grain,
+    )
     from src.randd_pipeline.checks.staging_asset_checks import (
         staged_responses_non_empty,
         staged_responses_required_columns,
@@ -49,6 +56,11 @@ else:
         staged_responses_non_empty,
         staged_responses_required_columns,
         staged_responses_unique_grain,
+        mapped_responses_table_exists,
+        mapped_responses_non_empty,
+        mapped_responses_required_columns,
+        mapped_responses_unique_grain,
+        mapped_responses_ultfoc_present,
     ]
 
 

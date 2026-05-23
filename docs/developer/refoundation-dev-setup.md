@@ -94,3 +94,5 @@
 - This proves Dagster asset orchestration, clean domain seam execution, and `TableStore` persistence wiring for mapping.
 - This is intentionally **not** a full mapping migration.
 - Postcode/ITL mapping, PG conversion, cell-number mapping, PNP mapping, NI mapping, mapper file loading framework, and mapping QA outputs are deliberately out of scope for this thin vertical slice.
+- `mapped_responses` now has contract-backed checks for table existence, non-empty output, required columns, unique grain (`reference+instance+survey_type+survey_year`), and populated `ultfoc`.
+- These remain smoke/contract checks over the clean foreign-ownership seam; they are not full mapping QA and do not cover postcode/ITL, PG, cell-number, PNP, or NI mapping.
