@@ -20,7 +20,7 @@ def _mapping_run_config() -> dict:
     scenario = scenario_path(SCENARIO_ID)
     return {
         "ops": {
-            "mapped_responses": {
+            "ultfoc_mapper": {
                 "config": {
                     "ultfoc_mapper_csv_path": str(scenario / "ultfoc_mapper.csv"),
                 }
