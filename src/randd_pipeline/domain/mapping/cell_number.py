@@ -19,10 +19,16 @@ def canonicalise_cell_number_mapper(mapper: pd.DataFrame) -> pd.DataFrame:
         columns={"cell_no": "cellnumber", "UNI_Count": "uni_count"}
     )
 
+    null_or_blank = canonical["cellnumber"].isna()
+    if canonical["cellnumber"].dtype == "object":
+        null_or_blank = null_or_blank | canonical["cellnumber"].astype(str).str.strip().eq("")
+    if null_or_blank.any():
+        raise ValueError("cell_number_mapper contains null or blank cellnumber values")
+
     if canonical["cellnumber"].duplicated().any():
         raise ValueError("cell_number_mapper contains duplicate cellnumber values")
 
-    bad_range = (~canonical["cellnumber"].between(1, 817, inclusive="both")) & canonical["cellnumber"].notna()
+    bad_range = ~canonical["cellnumber"].between(1, 817, inclusive="both")
     if bad_range.any():
         raise ValueError("cell_number_mapper contains cellnumber values outside inclusive range 1..817")
 

@@ -16,6 +16,17 @@ SCENARIO_ID = "mapping_cell_number_minimal"
 GRAIN = ["reference", "instance", "survey_type", "survey_year"]
 
 
+
+
+def test_mapping_cell_number_fixture_files_load() -> None:
+    for filename in [
+        "mapped_responses.csv",
+        "cell_number_mapper.csv",
+        "expected_cell_number_mapped_responses.csv",
+    ]:
+        df = load_scenario_csv(SCENARIO_ID, filename)
+        assert len(df) > 0
+
 def test_canonicalise_cell_number_mapper_matches_expected_canonical_columns() -> None:
     mapper = load_scenario_csv(SCENARIO_ID, "cell_number_mapper.csv")
     actual = canonicalise_cell_number_mapper(mapper)
@@ -28,6 +39,14 @@ def test_canonicalise_cell_number_mapper_duplicate_cell_no_raises() -> None:
     with pytest.raises(ValueError, match="duplicate"):
         canonicalise_cell_number_mapper(mapper)
 
+
+
+
+def test_canonicalise_cell_number_mapper_null_cell_no_raises() -> None:
+    mapper = load_scenario_csv(SCENARIO_ID, "cell_number_mapper.csv")
+    mapper.loc[0, "cell_no"] = None
+    with pytest.raises(ValueError, match="null or blank"):
+        canonicalise_cell_number_mapper(mapper)
 
 def test_canonicalise_cell_number_mapper_out_of_range_cell_no_raises() -> None:
     mapper = load_scenario_csv(SCENARIO_ID, "cell_number_mapper.csv")

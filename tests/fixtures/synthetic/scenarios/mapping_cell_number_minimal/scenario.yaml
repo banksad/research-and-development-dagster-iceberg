@@ -1,2 +1,13 @@
 scenario_id: mapping_cell_number_minimal
-description: Tiny synthetic fixture for clean cell-number mapping seam.
+description: Tiny synthetic fixture for cell-number mapper canonicalisation and join behaviour.
+owner: refoundation
+tags:
+  - synthetic
+  - mapping
+  - cell-number
+  - minimal
+inputs:
+  - mapped_responses.csv
+  - cell_number_mapper.csv
+expected_outputs:
+  - expected_cell_number_mapped_responses.csv
