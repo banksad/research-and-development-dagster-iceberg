@@ -30,3 +30,11 @@
 
 - `src/randd_pipeline.definitions` is the target Dagster module for the lean refoundation architecture.
 - `src/orchestration/dagster/definitions.py` is legacy wrapper scaffolding and should not be extended for new implementation work.
+
+## Local Iceberg development/testing notes
+
+- Local Iceberg tests use temporary SQLite-backed PyIceberg SQL catalogs under pytest temporary directories.
+- The local SQL catalog mode is strictly for development/testing and is not the production persistence design.
+- Production deployment is expected to use a lakehouse microservice/catalog-service configuration, likely REST-compatible.
+- Docker packaging for Google Cloud / Artifact Registry is intended later in the rollout, but is not implemented in this change.
+- No production endpoints, credentials, or secrets are stored in the repository for this setup.
