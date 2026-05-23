@@ -102,3 +102,9 @@
 - A synthetic in-process Dagster smoke test now validates the first connected refoundation slice: `staged_responses -> intermediate.staged_responses -> mapped_responses -> intermediate.mapped_responses`, including staged and mapped asset checks.
 - This remains synthetic fixture coverage and is **not** a full pipeline migration.
 - The following remain out of scope for this smoke path: raw snapshot ingestion, postcode/ITL mapping, product-group conversion, cell-number mapping, PNP area mapping, NI logic, imputation, estimation, and final outputs.
+
+## Mapping smoke ref-table note
+
+- Foreign ownership mapper is now represented as explicit `ref/ultfoc_mapper` (`ref.ultfoc_mapper`) in the mapping smoke slice.
+- `mapped_responses` now reads mapper data from `TableStore` (`ref.ultfoc_mapper`) instead of direct mapper CSV config.
+- This is still a thin seam slice and not a general mapper-loading framework.

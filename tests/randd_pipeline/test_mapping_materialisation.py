@@ -7,6 +7,7 @@ pd = pytest.importorskip("pandas")
 from src.randd_pipeline.assets.mapping import (
     load_ultfoc_mapper_from_csv,
     materialise_mapped_responses,
+    materialise_ultfoc_mapper,
 )
 from src.randd_pipeline.io import refs
 from src.randd_pipeline.resources import TableStoreResource
@@ -56,4 +57,37 @@ def test_materialise_mapped_responses_overwrite_true_replaces_contents(tmp_path)
     materialise_mapped_responses(store=store, df=second, overwrite=True)
 
     actual = store.read_table_as_dataframe(refs.INTERMEDIATE_MAPPED_RESPONSES)
+    pd.testing.assert_frame_equal(actual.reset_index(drop=True), second.reset_index(drop=True), check_like=False)
+
+
+def test_materialise_ultfoc_mapper_writes_to_ref_ultfoc_mapper(tmp_path) -> None:
+    resource = TableStoreResource(
+        catalog_name="mapping-materialise-ref-smoke",
+        catalog_type="local_sql",
+        warehouse=str(tmp_path / "warehouse"),
+    )
+    store = resource.get_table_store()
+
+    expected = pd.DataFrame({"ruref": ["A"], "ultfoc": ["GB"]})
+    materialise_ultfoc_mapper(store=store, df=expected, overwrite=False)
+
+    actual = store.read_table_as_dataframe(refs.REF_ULTFOC_MAPPER)
+    pd.testing.assert_frame_equal(actual.reset_index(drop=True), expected.reset_index(drop=True), check_like=False)
+
+
+def test_materialise_ultfoc_mapper_overwrite_true_replaces_contents(tmp_path) -> None:
+    resource = TableStoreResource(
+        catalog_name="mapping-materialise-ref-overwrite-smoke",
+        catalog_type="local_sql",
+        warehouse=str(tmp_path / "warehouse"),
+    )
+    store = resource.get_table_store()
+
+    first = pd.DataFrame({"ruref": ["A"], "ultfoc": ["GB"]})
+    second = pd.DataFrame({"ruref": ["B"], "ultfoc": ["US"]})
+
+    materialise_ultfoc_mapper(store=store, df=first, overwrite=False)
+    materialise_ultfoc_mapper(store=store, df=second, overwrite=True)
+
+    actual = store.read_table_as_dataframe(refs.REF_ULTFOC_MAPPER)
     pd.testing.assert_frame_equal(actual.reset_index(drop=True), second.reset_index(drop=True), check_like=False)

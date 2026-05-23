@@ -26,11 +26,7 @@ def _run_config() -> dict:
                     "responses_long_csv_path": str(scenario / "responses_long.csv"),
                 }
             },
-            "mapped_responses": {
-                "config": {
-                    "ultfoc_mapper_csv_path": str(scenario / "ultfoc_mapper.csv"),
-                }
-            },
+            "ultfoc_mapper": {"config": {"ultfoc_mapper_csv_path": str(scenario / "ultfoc_mapper.csv")}},
         }
     }
 
@@ -44,6 +40,7 @@ def _build_defs(resource: TableStoreResource):
     return dagster.Definitions(
         assets=[
             getattr(staging_mod, "staged_responses"),
+            getattr(mapping_mod, "ultfoc_mapper"),
             getattr(mapping_mod, "mapped_responses"),
         ],
         asset_checks=[

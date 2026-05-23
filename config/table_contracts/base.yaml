@@ -52,6 +52,20 @@ contracts:
     notes:
       - "TODO: Confirm trimming contract with outlier methodology owners."
 
+  - identifier: ref.ultfoc_mapper
+    namespace: ref
+    table: ultfoc_mapper
+    description: Foreign ownership reference mapper from response reference to ownership code.
+    layer: ref
+    owner: randd-reference-data
+    expected_grain: one row per ruref
+    primary_key: ruref
+    partition_by: []
+    required_columns: [ruref, ultfoc]
+    notes:
+      - "Used by the first clean mapping seam for foreign ownership mapping."
+      - "Tiny synthetic fixtures use this contract; production reference-data loading is not implemented here."
+
   - identifier: ref.postcode_mapper
     namespace: ref
     table: postcode_mapper
