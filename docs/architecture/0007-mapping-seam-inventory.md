@@ -221,3 +221,10 @@ Deliberate non-goals of this PR:
 - Contract-backed checks for `intermediate.mapped_responses` now exist.
 - Checks validate table contract required columns, explicit refoundation grain uniqueness (`reference+instance+survey_type+survey_year`), and populated `ultfoc`.
 - Checks deliberately remain narrower than full legacy mapping QA.
+
+
+## 10) Implementation note (PR 031)
+
+- `ref.ultfoc_mapper` now exists as the first explicit reference-table input for mapping in the lean refoundation slice.
+- Current scope supports the foreign ownership seam only (`staged_responses` + `ref.ultfoc_mapper` -> `mapped_responses`).
+- General reference-data ingestion and broader mapper-loading frameworks remain out of scope.

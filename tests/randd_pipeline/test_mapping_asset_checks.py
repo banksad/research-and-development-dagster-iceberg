@@ -34,7 +34,7 @@ def _build_defs(resource: TableStoreResource):
     checks_mod = importlib.import_module("src.randd_pipeline.checks.mapping_asset_checks")
 
     return dagster.Definitions(
-        assets=[getattr(mapping_mod, "mapped_responses")],
+        assets=[getattr(mapping_mod, "ultfoc_mapper"), getattr(mapping_mod, "mapped_responses")],
         asset_checks=[
             getattr(checks_mod, "mapped_responses_table_exists"),
             getattr(checks_mod, "mapped_responses_non_empty"),
@@ -50,16 +50,18 @@ def _check_messages(check_result) -> list[str]:
     return [event.event_specific_data.description for event in check_result.get_asset_check_evaluations()]
 
 
-def _seed_staged_responses(store) -> None:
+def _seed_staged_responses_and_mapper(store) -> None:
     scenario = scenario_path(SCENARIO_ID)
     staged = pd.read_csv(scenario / "staged_responses.csv")
+    mapper = pd.read_csv(scenario / "ultfoc_mapper.csv")
     store.create_table_from_dataframe(refs.INTERMEDIATE_STAGED_RESPONSES, staged)
+    store.create_table_from_dataframe(refs.REF_ULTFOC_MAPPER, mapper)
 
 
 def test_mapped_asset_checks_pass_after_materialisation(tmp_path) -> None:
     resource = TableStoreResource(catalog_name="mapped-check-pass", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
     defs = _build_defs(resource)
-    _seed_staged_responses(resource.get_table_store())
+    _seed_staged_responses_and_mapper(resource.get_table_store())
 
     result = defs.get_implicit_global_asset_job_def().execute_in_process(run_config=_mapping_run_config())
     assert result.success
@@ -140,7 +142,7 @@ def test_mapped_checks_attach_to_explicit_asset_key() -> None:
 def test_mapped_checks_do_not_import_legacy_modules(tmp_path) -> None:
     resource = TableStoreResource(catalog_name="mapped-check-import-smoke", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
     defs = _build_defs(resource)
-    _seed_staged_responses(resource.get_table_store())
+    _seed_staged_responses_and_mapper(resource.get_table_store())
 
     result = defs.get_implicit_global_asset_job_def().execute_in_process(run_config=_mapping_run_config())
     assert result.success

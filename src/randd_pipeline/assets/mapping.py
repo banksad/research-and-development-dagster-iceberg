@@ -1,4 +1,4 @@
-"""Synthetic mapping smoke asset and helpers."""
+"""Synthetic mapping smoke assets and helpers."""
 
 from __future__ import annotations
 
@@ -17,16 +17,16 @@ _REQUIRED_MAPPER_COLUMNS = ("ruref", "ultfoc")
 
 
 @dataclass(frozen=True)
-class MappedResponsesConfig:
-    """Config contract for the mapped responses smoke asset."""
+class UltfocMapperConfig:
+    """Config contract for the ultfoc mapper smoke asset."""
 
     ultfoc_mapper_csv_path: str
 
     @classmethod
-    def from_mapping(cls, config: dict[str, Any]) -> "MappedResponsesConfig":
+    def from_mapping(cls, config: dict[str, Any]) -> "UltfocMapperConfig":
         ultfoc_mapper_csv_path = config.get("ultfoc_mapper_csv_path")
         if not ultfoc_mapper_csv_path:
-            raise ValueError("mapped_responses asset requires config key 'ultfoc_mapper_csv_path'")
+            raise ValueError("ultfoc_mapper asset requires config key 'ultfoc_mapper_csv_path'")
         return cls(ultfoc_mapper_csv_path=str(ultfoc_mapper_csv_path))
 
 
@@ -44,6 +44,12 @@ def load_ultfoc_mapper_from_csv(path: str | Path) -> pd.DataFrame:
     return df
 
 
+def materialise_ultfoc_mapper(store: TableStore, df: pd.DataFrame, overwrite: bool = False) -> None:
+    """Materialise ultfoc mapper to ``ref.ultfoc_mapper``."""
+
+    store.create_table_from_dataframe(refs.REF_ULTFOC_MAPPER, df, overwrite=overwrite)
+
+
 def materialise_mapped_responses(store: TableStore, df: pd.DataFrame, overwrite: bool = False) -> None:
     """Materialise mapped responses to ``intermediate.mapped_responses``."""
 
@@ -58,18 +64,33 @@ else:
     from dagster import AssetKey
 
     @asset(
-        key=AssetKey(["intermediate", "mapped_responses"]),
+        key=AssetKey(["ref", "ultfoc_mapper"]),
         config_schema={"ultfoc_mapper_csv_path": str},
     )
-    def mapped_responses(context, table_store: TableStoreResource) -> dict[str, Any]:
+    def ultfoc_mapper(context, table_store: TableStoreResource) -> dict[str, Any]:
+        """Materialise foreign ownership mapper reference table."""
+
+        config = UltfocMapperConfig.from_mapping(context.op_config)
+        store = table_store.get_table_store()
+
+        mapper = load_ultfoc_mapper_from_csv(config.ultfoc_mapper_csv_path)
+        materialise_ultfoc_mapper(store=store, df=mapper, overwrite=False)
+
+        return {
+            "table": refs.REF_ULTFOC_MAPPER,
+            "row_count": int(len(mapper)),
+            "column_count": int(len(mapper.columns)),
+        }
+
+    @asset(key=AssetKey(["intermediate", "mapped_responses"]))
+    def mapped_responses(table_store: TableStoreResource) -> dict[str, Any]:
         """Materialise mapped responses through the clean foreign-ownership seam."""
 
-        config = MappedResponsesConfig.from_mapping(context.op_config)
         store = table_store.get_table_store()
 
         staged = store.read_table_as_dataframe(refs.INTERMEDIATE_STAGED_RESPONSES)
-        ultfoc_mapper = load_ultfoc_mapper_from_csv(config.ultfoc_mapper_csv_path)
-        mapped = apply_foreign_ownership_mapping(staged_responses=staged, ultfoc_mapper=ultfoc_mapper)
+        ultfoc_mapper_df = store.read_table_as_dataframe(refs.REF_ULTFOC_MAPPER)
+        mapped = apply_foreign_ownership_mapping(staged_responses=staged, ultfoc_mapper=ultfoc_mapper_df)
 
         materialise_mapped_responses(store=store, df=mapped, overwrite=False)
 
