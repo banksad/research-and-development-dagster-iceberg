@@ -3,10 +3,13 @@
 ## Repository mission
 This repository is a pandas-based reproducible analytical pipeline for producing business expenditure on research and development statistics.
 
-## Migration direction (Dagster + Iceberg)
-- Long-term orchestration target: Dagster assets and asset checks.
-- Long-term persistence target: Apache Iceberg tables as the canonical persistence layer for inputs, intermediate assets, QA outputs, and final outputs.
-- CSV files should be treated as optional export artefacts, not canonical outputs.
+## Refoundation direction (lean Dagster + Iceberg)
+- Target architecture is a **lean Dagster/Iceberg-native analytical pipeline**.
+- This project direction is **not** to wrap and preserve the existing file-based pipeline as the end state.
+- The existing pipeline may remain temporarily as a **parity oracle** during migration.
+- Dagster assets and asset checks are the orchestration layer.
+- Apache Iceberg tables are the canonical persistence layer for inputs, intermediates, QA outputs, and final outputs.
+- CSV files are optional terminal export artefacts only.
 
 ## Hard constraints for all Codex tasks
 - Do **not** rewrite statistical or business logic unless explicitly requested.
@@ -14,21 +17,22 @@ This repository is a pandas-based reproducible analytical pipeline for producing
 - Do **not** add secrets, credentials, or real data.
 - Prefer synthetic or test fixtures for examples.
 
-## Safe migration rules
-1. Keep PRs small, single-purpose, and easy to review on mobile.
-2. Prefer documentation-first changes before implementation refactors.
-3. When introducing Dagster, initially wrap existing `run_*` functions as assets before deeper refactors.
-4. Preserve stage boundaries at first to reduce regression risk.
-5. Reuse existing config and schema validation logic for Dagster asset checks where possible.
-6. Keep migration steps reversible and explicit.
+## Refoundation migration rules
+1. Keep PRs scoped and implementation-sequenced; use documentation-first when direction/contract changes.
+2. Prefer extracting core statistical/business transforms into pure pandas/domain functions.
+3. Deprecate legacy orchestration and I/O plumbing where it does not contribute to analytical meaning.
+4. Do not preserve backwards compatibility for its own sake.
+5. Treat freezing/construction as legacy file-era mechanisms, not first-class stages in the target design.
+6. Keep changes reversible and explicit, with clear rollback notes.
 
-## Branch-specific working mode (`lite-pipeline`)
-- On the `lite-pipeline` branch, larger PRs are explicitly allowed, including significant multi-file changes, to support the planned large-scale simplification refactor.
-- For this branch, prioritise coherent refactor batches over mobile-sized PRs, while still documenting assumptions, risks, rollback, and validation evidence.
+## Legacy concepts to phase out
+- Freezing as a stage: replaced by Iceberg snapshots/history/metadata and explicit release tagging.
+- Construction as hidden mutation: replaced by explicit correction input tables/assets (e.g. `ops.response_corrections`, `ops.postcode_corrections`).
+- Legacy file-path plumbing and run modes, run logs, platform-specific `rd_*` file modules.
 
 ## Numerical equivalence requirements
-- Any migration PR that changes orchestration or persistence must explicitly state expected numerical equivalence with the current pipeline.
-- For any changed pathway, add reconciliation evidence or checks comparing new-path outputs to current-path outputs.
+- Any refactor PR that changes orchestration or persistence must explicitly state expected numerical equivalence with the current pathway.
+- For any changed pathway, add reconciliation evidence/checks comparing new-path outputs to oracle-path outputs.
 
 ## PR checklist expectations
 - Confirm whether runtime Python logic changed (default expectation: no unless requested).
@@ -42,4 +46,5 @@ This repository is a pandas-based reproducible analytical pipeline for producing
   - target state,
   - migration principles,
   - non-goals,
-  - and phased rollout intent.
+  - phased rollout intent,
+  - parity/equivalence evidence expectations.
