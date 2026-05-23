@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import pandas as pd
 
-DEFAULT_KEY_COLUMNS = ["reference", "instance", "survey", "period"]
+DEFAULT_KEY_COLUMNS = ["reference", "instance", "survey_type", "survey_year"]
+LEGACY_KEY_COLUMNS = ["reference", "instance", "survey", "period"]
 CONTRIBUTOR_DROP_COLUMNS = ["createdby", "createddate", "lastupdatedby"]
 RESPONSE_DROP_COLUMNS = [
     "createdby",
@@ -43,6 +44,18 @@ def create_contextual_dataframe(
     return merged.drop(columns=["questioncode", "response"]).drop_duplicates()
 
 
+def canonicalise_staging_columns(
+    df: pd.DataFrame,
+    *,
+    survey_column: str = "survey",
+    period_column: str = "period",
+) -> pd.DataFrame:
+    canonicalised = df.rename(
+        columns={survey_column: "survey_type", period_column: "survey_year"}
+    )
+    return canonicalised
+
+
 def build_full_responses(
     contributors: pd.DataFrame,
     responses: pd.DataFrame,
@@ -50,11 +63,14 @@ def build_full_responses(
 ) -> pd.DataFrame:
     key_columns = key_columns or DEFAULT_KEY_COLUMNS
 
-    _require_columns(contributors, key_columns, "contributors")
-    _require_columns(responses, key_columns + ["questioncode", "response"], "responses")
+    contributors_canonical = canonicalise_staging_columns(contributors)
+    responses_canonical = canonicalise_staging_columns(responses)
 
-    contributors_trimmed = contributors.drop(columns=CONTRIBUTOR_DROP_COLUMNS, errors="ignore")
-    responses_trimmed = responses.drop(columns=RESPONSE_DROP_COLUMNS, errors="ignore")
+    _require_columns(contributors_canonical, key_columns, "contributors")
+    _require_columns(responses_canonical, key_columns + ["questioncode", "response"], "responses")
+
+    contributors_trimmed = contributors_canonical.drop(columns=CONTRIBUTOR_DROP_COLUMNS, errors="ignore")
+    responses_trimmed = responses_canonical.drop(columns=RESPONSE_DROP_COLUMNS, errors="ignore")
 
     if "instance" in responses_trimmed.columns:
         responses_trimmed = responses_trimmed.astype({"instance": "Int64"})

@@ -156,6 +156,7 @@ contracts:
     required_columns: [survey_year, survey_type, reference, instance]
     notes:
       - "TODO: Validate required staging columns against extracted domain transforms."
+      - "Canonical staged-response output naming uses survey_type/survey_year (legacy input often arrives as survey/period)."
 
   - identifier: intermediate.mapped_responses
     namespace: intermediate
