@@ -21,8 +21,7 @@ def _build_local_store(tmp_path):
     resource = TableStoreResource(
         catalog_name="raw-input-smoke",
         catalog_type="local_sql",
-        warehouse=str(tmp_path / "warehouse"),
-        uri=f"sqlite:///{tmp_path / 'catalog.db'}",
+        warehouse=str(tmp_path / "warehouse")
     )
     return resource.get_table_store()
 

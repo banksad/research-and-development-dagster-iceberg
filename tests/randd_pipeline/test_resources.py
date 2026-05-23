@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from src.randd_pipeline.io import refs
 from src.randd_pipeline.resources import TableStoreResource
@@ -97,3 +98,42 @@ def test_table_store_resource_local_sql_has_no_production_endpoint_or_credential
     assert "hdfs" not in resource.warehouse.lower()
     assert "\\\\" not in resource.warehouse
     assert "credential" not in " ".join(resource.properties.keys()).lower()
+
+
+def test_table_store_resource_local_sql_warehouse_only_normalises_properties(tmp_path):
+    resource = TableStoreResource(
+        catalog_name="local-dev",
+        catalog_type="local_sql",
+        warehouse=str(tmp_path),
+    )
+
+    store = resource.get_table_store()
+
+    assert store._config.properties["warehouse"] == str(tmp_path)
+    assert store._config.properties["uri"].startswith("sqlite:///")
+
+
+def test_table_store_resource_local_sql_without_warehouse_raises_value_error():
+    resource = TableStoreResource(
+        catalog_name="local-dev",
+        catalog_type="local_sql",
+    )
+
+    with pytest.raises(ValueError, match="local_sql catalog requires a warehouse path"):
+        resource.get_table_store()
+
+
+def test_table_store_resource_local_sql_can_create_and_read_without_properties(tmp_path):
+    resource = TableStoreResource(
+        catalog_name="local-dev",
+        catalog_type="local_sql",
+        warehouse=str(tmp_path),
+    )
+
+    store = resource.get_table_store()
+    expected = _synthetic_rows()
+
+    store.create_table_from_dataframe(refs.RAW_FULL_RESPONSES, expected)
+
+    out = store.read_table_as_dataframe(refs.RAW_FULL_RESPONSES).sort_values("reference")
+    assert out["reference"].tolist() == [1001, 1002]
