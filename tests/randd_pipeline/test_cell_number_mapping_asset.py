@@ -35,7 +35,11 @@ def test_cell_number_mapping_assets_use_explicit_asset_keys() -> None:
 
 def test_cell_number_mapping_assets_materialise_expected_tables(tmp_path) -> None:
     scenario = scenario_path(SCENARIO_ID)
-    resource = TableStoreResource("cell-mapping", "local_sql", str(tmp_path / "warehouse"))
+    resource = TableStoreResource(
+        catalog_name="cell-mapping",
+        catalog_type="local_sql",
+        warehouse=str(tmp_path / "warehouse"),
+    )
     store = resource.get_table_store()
     store.create_table_from_dataframe(refs.INTERMEDIATE_MAPPED_RESPONSES, pd.read_csv(scenario / "mapped_responses.csv"))
 
@@ -57,7 +61,11 @@ def test_cell_number_mapping_assets_materialise_expected_tables(tmp_path) -> Non
 
 def test_cell_number_mapping_assets_duplicate_materialisation_fails(tmp_path) -> None:
     scenario = scenario_path(SCENARIO_ID)
-    resource = TableStoreResource("cell-mapping-dupe", "local_sql", str(tmp_path / "warehouse"))
+    resource = TableStoreResource(
+        catalog_name="cell-mapping-dupe",
+        catalog_type="local_sql",
+        warehouse=str(tmp_path / "warehouse"),
+    )
     store = resource.get_table_store()
     store.create_table_from_dataframe(refs.INTERMEDIATE_MAPPED_RESPONSES, pd.read_csv(scenario / "mapped_responses.csv"))
 
