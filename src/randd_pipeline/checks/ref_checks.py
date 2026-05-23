@@ -1,4 +1,4 @@
-"""Framework-light checks for ``ref.ultfoc_mapper``."""
+"""Framework-light checks for reference mapper tables."""
 
 from __future__ import annotations
 
@@ -17,6 +17,11 @@ _ULTFOC_MAPPER_GRAIN = ["ruref"]
 def _ultfoc_mapper_contract():
     contracts = load_table_contracts(_CONTRACTS_PATH)
     return get_table_contract(contracts, refs.REF_ULTFOC_MAPPER)
+
+
+def _cell_number_mapper_contract():
+    contracts = load_table_contracts(_CONTRACTS_PATH)
+    return get_table_contract(contracts, refs.REF_CELL_NUMBER_MAPPER)
 
 
 def check_ultfoc_mapper_required_columns(df: pd.DataFrame) -> tuple[bool, str]:
@@ -44,3 +49,45 @@ def check_ultfoc_mapper_unique_ruref(df: pd.DataFrame) -> tuple[bool, str]:
         return False, f"Found duplicate rows at ultfoc mapper grain (ruref): {duplicate_count} duplicate row(s)."
 
     return True, f"ultfoc mapper grain is unique at ruref ({len(df)} row(s) checked)."
+
+
+def check_cell_number_mapper_required_columns(df: pd.DataFrame) -> tuple[bool, str]:
+    contract = _cell_number_mapper_contract()
+    return check_contract_required_columns(df, contract)
+
+
+def check_cell_number_mapper_non_empty(df: pd.DataFrame) -> tuple[bool, str]:
+    return check_non_empty(df)
+
+
+def check_cell_number_mapper_unique_cellnumber(df: pd.DataFrame) -> tuple[bool, str]:
+    if "cellnumber" not in df.columns:
+        return False, "Cannot validate cellnumber uniqueness; missing column: cellnumber"
+
+    duplicate_count = int(df.duplicated(subset=["cellnumber"], keep=False).sum())
+    if duplicate_count > 0:
+        return False, f"Found duplicate rows at cell-number mapper grain (cellnumber): {duplicate_count} duplicate row(s)."
+
+    return True, f"cell-number mapper grain is unique at cellnumber ({len(df)} row(s) checked)."
+
+
+def check_cell_number_mapper_cellnumber_range(df: pd.DataFrame) -> tuple[bool, str]:
+    if "cellnumber" not in df.columns:
+        return False, "Cannot validate cellnumber range; missing column: cellnumber"
+
+    as_text = df["cellnumber"].astype("string")
+    null_count = int(df["cellnumber"].isna().sum())
+    blank_count = int(as_text.str.strip().eq("").sum())
+    if null_count > 0 or blank_count > 0:
+        return False, f"cellnumber contains null/blank values: null={null_count}, blank={blank_count}."
+
+    numeric = pd.to_numeric(df["cellnumber"], errors="coerce")
+    invalid_numeric = int(numeric.isna().sum())
+    if invalid_numeric > 0:
+        return False, f"cellnumber contains non-numeric values: {invalid_numeric} row(s)."
+
+    out_of_range = int(((numeric < 1) | (numeric > 817)).sum())
+    if out_of_range > 0:
+        return False, f"cellnumber values out of inclusive range 1..817: {out_of_range} row(s)."
+
+    return True, f"cellnumber is populated and within inclusive range 1..817 for {len(df)} row(s)."

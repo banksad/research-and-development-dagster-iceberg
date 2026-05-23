@@ -117,3 +117,6 @@
 
 - A first clean cell-number seam now exists via `ref/cell_number_mapper` and `intermediate/cell_number_mapped_responses` using synthetic fixtures and canonicalised mapper columns.
 - This is still not a full mapping migration: postcode/ITL, PG conversion, PNP, NI, and broader `run_mapping` behaviour remain out of scope.
+
+- Cell-number seam checks now include contract-backed checks for `ref/cell_number_mapper` (existence, non-empty, required columns, unique `cellnumber`, inclusive range 1..817) and `intermediate/cell_number_mapped_responses` (existence, non-empty, required columns, unique grain, mapped metadata populated where `cellno` is non-null).
+- This remains a narrow cell-number seam quality gate and is not full mapping QA coverage.
