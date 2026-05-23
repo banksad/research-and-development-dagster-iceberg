@@ -1,0 +1,262 @@
+version: 1
+contracts:
+  - identifier: raw.full_responses
+    namespace: raw
+    table: full_responses
+    description: Raw full survey response records as landed input.
+    layer: raw
+    owner: randd-data-platform
+    expected_grain: reference + instance + survey_year + survey_type
+    primary_key: null
+    partition_by: [survey_year, survey_type]
+    required_columns: [survey_year, survey_type, reference, instance]
+    notes:
+      - "TODO: Confirm complete key and schema with staging extraction contract."
+
+  - identifier: raw.backdata
+    namespace: raw
+    table: backdata
+    description: Historic backdata input records used for longitudinal processing.
+    layer: raw
+    owner: randd-data-platform
+    expected_grain: reference + instance + survey_year + survey_type
+    primary_key: null
+    partition_by: [survey_year, survey_type]
+    required_columns: [survey_year, survey_type, reference, instance]
+    notes:
+      - "TODO: Clarify source system lineage and historical key semantics."
+
+  - identifier: raw.manual_outliers
+    namespace: raw
+    table: manual_outliers
+    description: Manual outlier directives provided as input.
+    layer: raw
+    owner: randd-methodology
+    expected_grain: correction row per subject variable/context
+    primary_key: null
+    partition_by: [survey_year, survey_type]
+    required_columns: [survey_year, survey_type, reference]
+    notes:
+      - "TODO: Confirm directive field set required by outlier stage logic."
+
+  - identifier: raw.manual_trimming
+    namespace: raw
+    table: manual_trimming
+    description: Manual trimming directives provided as input.
+    layer: raw
+    owner: randd-methodology
+    expected_grain: correction row per subject variable/context
+    primary_key: null
+    partition_by: [survey_year, survey_type]
+    required_columns: [survey_year, survey_type, reference]
+    notes:
+      - "TODO: Confirm trimming contract with outlier methodology owners."
+
+  - identifier: ref.postcode_mapper
+    namespace: ref
+    table: postcode_mapper
+    description: Reference mapping from postcode to analytical geography attributes.
+    layer: ref
+    owner: randd-reference-data
+    expected_grain: one row per postcode
+    primary_key: postcode
+    partition_by: []
+    required_columns: [postcode]
+    notes:
+      - "TODO: Add required destination geography columns once standardised."
+
+  - identifier: ref.pg_detailed_mapper
+    namespace: ref
+    table: pg_detailed_mapper
+    description: Detailed product-group reference mappings.
+    layer: ref
+    owner: randd-reference-data
+    expected_grain: one row per product group code
+    primary_key: null
+    partition_by: []
+    required_columns: [pg_code]
+    notes:
+      - "TODO: Confirm canonical code column naming and uniqueness assumptions."
+
+  - identifier: ref.sic_division_detailed_mapper
+    namespace: ref
+    table: sic_division_detailed_mapper
+    description: SIC division to detailed analytical mapping reference.
+    layer: ref
+    owner: randd-reference-data
+    expected_grain: one row per SIC division code
+    primary_key: null
+    partition_by: []
+    required_columns: [sic_division]
+    notes:
+      - "TODO: Confirm SIC key naming and expanded reference fields."
+
+  - identifier: ops.response_corrections
+    namespace: ops
+    table: response_corrections
+    description: Explicit auditable response-value corrections applied as controlled input.
+    layer: ops
+    owner: randd-operations
+    expected_grain: one correction event per variable and response record
+    primary_key: correction_id
+    partition_by: [survey_year, survey_type]
+    required_columns:
+      - correction_id
+      - survey_year
+      - survey_type
+      - reference
+      - instance
+      - variable
+      - old_value
+      - new_value
+      - reason
+      - source
+      - approved_by
+      - approved_at
+      - created_at
+    notes:
+      - "Replaces legacy hidden construction mutation with explicit auditable input records."
+      - "Corrections must be attributable and approval-traceable."
+
+  - identifier: ops.postcode_corrections
+    namespace: ops
+    table: postcode_corrections
+    description: Explicit auditable postcode corrections applied as controlled input.
+    layer: ops
+    owner: randd-operations
+    expected_grain: one postcode correction event per response record
+    primary_key: correction_id
+    partition_by: [survey_year, survey_type]
+    required_columns:
+      - correction_id
+      - survey_year
+      - survey_type
+      - reference
+      - instance
+      - old_postcode
+      - new_postcode
+      - reason
+      - source
+      - approved_by
+      - approved_at
+      - created_at
+    notes:
+      - "Replaces legacy hidden construction mutation with explicit auditable input records."
+      - "Postcode amendments are governed operational inputs, not hidden runtime mutation."
+
+  - identifier: intermediate.staged_responses
+    namespace: intermediate
+    table: staged_responses
+    description: Staged and validated response records before mapping.
+    layer: intermediate
+    owner: randd-pipeline
+    expected_grain: reference + instance + survey_year + survey_type
+    primary_key: null
+    partition_by: [survey_year, survey_type]
+    required_columns: [survey_year, survey_type, reference, instance]
+    notes:
+      - "TODO: Validate required staging columns against extracted domain transforms."
+
+  - identifier: intermediate.mapped_responses
+    namespace: intermediate
+    table: mapped_responses
+    description: Responses enriched with mapping outputs.
+    layer: intermediate
+    owner: randd-pipeline
+    expected_grain: reference + instance + survey_year + survey_type
+    primary_key: null
+    partition_by: [survey_year, survey_type]
+    required_columns: [survey_year, survey_type, reference, instance]
+    notes:
+      - "TODO: Add required mapping output columns when mapping contracts are finalised."
+
+  - identifier: intermediate.imputed_responses
+    namespace: intermediate
+    table: imputed_responses
+    description: Responses after imputation transformations.
+    layer: intermediate
+    owner: randd-methodology
+    expected_grain: reference + instance + survey_year + survey_type
+    primary_key: null
+    partition_by: [survey_year, survey_type]
+    required_columns: [survey_year, survey_type, reference, instance]
+    notes:
+      - "TODO: Confirm imputation-status markers required for QA checks."
+
+  - identifier: intermediate.outlier_adjusted_responses
+    namespace: intermediate
+    table: outlier_adjusted_responses
+    description: Responses after manual/auto outlier adjustments.
+    layer: intermediate
+    owner: randd-methodology
+    expected_grain: reference + instance + survey_year + survey_type
+    primary_key: null
+    partition_by: [survey_year, survey_type]
+    required_columns: [survey_year, survey_type, reference, instance]
+    notes:
+      - "TODO: Define outlier adjustment provenance columns."
+
+  - identifier: intermediate.estimated_responses
+    namespace: intermediate
+    table: estimated_responses
+    description: Estimation-stage response outputs.
+    layer: intermediate
+    owner: randd-methodology
+    expected_grain: reference + instance + survey_year + survey_type
+    primary_key: null
+    partition_by: [survey_year, survey_type]
+    required_columns: [survey_year, survey_type, reference, instance]
+    notes:
+      - "TODO: Confirm estimator output key fields and QA metrics."
+
+  - identifier: intermediate.site_apportioned_responses
+    namespace: intermediate
+    table: site_apportioned_responses
+    description: Site-apportioned response outputs after estimation.
+    layer: intermediate
+    owner: randd-methodology
+    expected_grain: reference + instance + site + survey_year + survey_type
+    primary_key: null
+    partition_by: [survey_year, survey_type]
+    required_columns: [survey_year, survey_type, reference, instance]
+    notes:
+      - "TODO: Confirm site key column naming and uniqueness contract."
+
+  - identifier: mart.short_form
+    namespace: mart
+    table: short_form
+    description: Short-form analytical mart output.
+    layer: mart
+    owner: randd-outputs
+    expected_grain: TODO
+    primary_key: null
+    partition_by: [survey_year, survey_type]
+    required_columns: [survey_year, survey_type]
+    notes:
+      - "TODO: Confirm short-form publication grain and output schema."
+
+  - identifier: mart.long_form
+    namespace: mart
+    table: long_form
+    description: Long-form analytical mart output.
+    layer: mart
+    owner: randd-outputs
+    expected_grain: TODO
+    primary_key: null
+    partition_by: [survey_year, survey_type]
+    required_columns: [survey_year, survey_type]
+    notes:
+      - "TODO: Confirm long-form publication grain and output schema."
+
+  - identifier: mart.intram_totals
+    namespace: mart
+    table: intram_totals
+    description: Intramural totals analytical mart output.
+    layer: mart
+    owner: randd-outputs
+    expected_grain: TODO
+    primary_key: null
+    partition_by: [survey_year, survey_type]
+    required_columns: [survey_year, survey_type]
+    notes:
+      - "TODO: Confirm intram totals grain and publication schema."
