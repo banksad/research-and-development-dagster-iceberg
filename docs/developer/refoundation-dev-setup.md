@@ -87,3 +87,10 @@
 - `staged_responses` now has contract-backed checks for table existence, non-empty output, required columns, and unique grain on `reference + instance + survey_type + survey_year`.
 - These remain smoke/contract checks over the clean transmutation seam.
 - They are not full staging QA and do not cover postcode or mapper validation.
+
+## First mapping foreign-ownership smoke path
+
+- The first mapping smoke asset materialises the clean foreign-ownership seam to `intermediate.mapped_responses`.
+- This proves Dagster asset orchestration, clean domain seam execution, and `TableStore` persistence wiring for mapping.
+- This is intentionally **not** a full mapping migration.
+- Postcode/ITL mapping, PG conversion, cell-number mapping, PNP mapping, NI mapping, mapper file loading framework, and mapping QA outputs are deliberately out of scope for this thin vertical slice.
