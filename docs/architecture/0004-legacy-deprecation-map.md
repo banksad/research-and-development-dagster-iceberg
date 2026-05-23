@@ -1,6 +1,6 @@
 # 0004: Legacy deprecation map for lean refoundation
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-05-23
 
 ## Purpose

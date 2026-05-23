@@ -48,3 +48,8 @@ This repository is a pandas-based reproducible analytical pipeline for producing
   - non-goals,
   - phased rollout intent,
   - parity/equivalence evidence expectations.
+
+## Dagster wrapper scaffold guardrails
+- Do **not** extend `src/orchestration/dagster/definitions.py` as the target architecture.
+- New implementation work should target the future lean package, expected at `src/randd_pipeline/`.
+- Wrapper-style assets around old stage boundaries are legacy scaffolding, not the desired implementation path.

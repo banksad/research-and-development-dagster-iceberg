@@ -1,6 +1,6 @@
 # 0002: Migration principles for lean Dagster + Iceberg refoundation
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-05-23
 
 ## Purpose

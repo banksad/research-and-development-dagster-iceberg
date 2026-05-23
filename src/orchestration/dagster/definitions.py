@@ -1,9 +1,12 @@
-"""Dagster orchestration scaffolding for existing pipeline stages.
+"""LEGACY Dagster wrapper scaffolding (deprecated; not target architecture).
 
-This module introduces orchestration-layer placeholders only:
-- No statistical or business logic changes.
-- No canonical persistence changes (CSV-first behavior remains in place).
-- Existing stage boundaries from ``src.pipeline`` are preserved intentionally.
+This module is intentionally retained as a temporary compatibility scaffold only:
+- It mirrors legacy `src.pipeline` stage boundaries via placeholders.
+- It is NOT the implementation path for the lean Dagster/Iceberg refoundation.
+- Do not extend this file for new pipeline implementation work.
+- Future Dagster implementation should live under `src/randd_pipeline/`.
+
+No statistical/business logic is implemented or changed in this module.
 """
 
 from __future__ import annotations
@@ -90,6 +93,12 @@ def site_apportionment_asset() -> str:
 def outputs_asset() -> str:
     _ = _load_callable("src.outputs.outputs_main", "run_outputs")
     return "outputs wrapper placeholder"
+
+
+LEGACY_WRAPPER_SCAFFOLD_NOTICE = (
+    "Deprecated wrapper scaffold: do not extend this module for the lean refoundation; "
+    "implement new Dagster assets/definitions under src/randd_pipeline/."
+)
 
 
 defs = Definitions(
