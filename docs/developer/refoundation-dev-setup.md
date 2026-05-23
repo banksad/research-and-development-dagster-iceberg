@@ -113,6 +113,11 @@
 - These are reference-input checks for the first foreign ownership mapping seam only.
 - They are not a general reference-data validation framework.
 
+## Mapping table-shape ADR note
+
+- Mapping seam-level tables are currently useful development slices during refoundation.
+- ADR `docs/architecture/0009-mapping-table-shape.md` proposes that v1 downstream consumption should converge on canonical `intermediate.mapped_responses`, with seam-level mapped tables retained only when explicitly justified as temporary debug/checkpoint assets.
+
 ## Cell-number seam note
 
 - A first clean cell-number seam now exists via `ref/cell_number_mapper` and `intermediate/cell_number_mapped_responses` using synthetic fixtures and canonicalised mapper columns.
