@@ -76,14 +76,17 @@ class LocalPyIcebergTableStore(TableStore):
         namespace = identifier.split(".", 1)[0]
         self.ensure_namespace(namespace)
 
-        if overwrite and self.table_exists(identifier):
-            self.catalog.drop_table(identifier)
+        exists = self.table_exists(identifier)
+        if exists and not overwrite:
+            raise ValueError(
+                f"Table '{identifier}' already exists. "
+                "Use overwrite=True to replace contents or append_dataframe to append rows."
+            )
 
         arrow_table = pa.Table.from_pandas(df, preserve_index=False)
-        if self.table_exists(identifier):
-            table = self.catalog.load_table(identifier)
-            table.overwrite(arrow_table)
-            return
+
+        if exists and overwrite:
+            self.catalog.drop_table(identifier)
 
         self.catalog.create_table(identifier=identifier, schema=arrow_table.schema)
         table = self.catalog.load_table(identifier)

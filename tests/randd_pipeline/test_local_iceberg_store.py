@@ -80,3 +80,50 @@ def test_load_catalog_rejects_unknown_catalog_type():
         assert "Unsupported catalog config type" in str(err)
     else:
         raise AssertionError("Expected ValueError for unsupported catalog type")
+
+
+def test_create_existing_table_with_overwrite_false_raises_value_error(tmp_path):
+    config = local_sql_catalog_config(name="local-iceberg", warehouse_path=tmp_path)
+    store = LocalPyIcebergTableStore(config)
+
+    store.create_table_from_dataframe(refs.RAW_FULL_RESPONSES, _synthetic_rows())
+
+    try:
+        store.create_table_from_dataframe(refs.RAW_FULL_RESPONSES, _synthetic_rows(), overwrite=False)
+    except ValueError as err:
+        assert "already exists" in str(err)
+    else:
+        raise AssertionError("Expected ValueError when table exists and overwrite is False")
+
+
+def test_create_existing_table_with_overwrite_true_replaces_contents(tmp_path):
+    config = local_sql_catalog_config(name="local-iceberg", warehouse_path=tmp_path)
+    store = LocalPyIcebergTableStore(config)
+
+    store.create_table_from_dataframe(refs.RAW_FULL_RESPONSES, _synthetic_rows())
+
+    replacement = pd.DataFrame(
+        [
+            {
+                "survey_year": 2024,
+                "survey_type": "BERD",
+                "reference": 2001,
+                "instance": 0,
+                "value": 111.0,
+            }
+        ]
+    )
+
+    store.create_table_from_dataframe(refs.RAW_FULL_RESPONSES, replacement, overwrite=True)
+
+    out = store.read_table_as_dataframe(refs.RAW_FULL_RESPONSES)
+    assert len(out) == 1
+    assert out["reference"].tolist() == [2001]
+    assert out["value"].tolist() == [111.0]
+
+
+def test_unknown_table_exists_returns_false(tmp_path):
+    config = local_sql_catalog_config(name="local-iceberg", warehouse_path=tmp_path)
+    store = LocalPyIcebergTableStore(config)
+
+    assert store.table_exists("raw.not_a_real_table") is False

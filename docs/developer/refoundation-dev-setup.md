@@ -34,6 +34,8 @@
 ## Local Iceberg development/testing notes
 
 - Local Iceberg tests use temporary SQLite-backed PyIceberg SQL catalogs under pytest temporary directories.
+- Table creation is deliberately non-mutating by default: `create_table_from_dataframe(...)` should fail when a table already exists unless `overwrite=True` is passed explicitly.
+- Replacement writes must be explicit via `overwrite=True`; row appends must be explicit via `append_dataframe(...)`.
 - The local SQL catalog mode is strictly for development/testing and is not the production persistence design.
 - Production deployment is expected to use a lakehouse microservice/catalog-service configuration, likely REST-compatible.
 - Docker packaging for Google Cloud / Artifact Registry is intended later in the rollout, but is not implemented in this change.
