@@ -136,13 +136,13 @@ Proposed new scenario: `tests/fixtures/synthetic/staging_minimal_valid_responses
 - dropped cols to exercise behavior: `createdby`, `createddate`, `lastupdatedby`, `lastupdateddate`, `adjustedresponse`
 
 #### `expected_full_responses.csv`
-- one row per (`reference`, `instance`)
+- one row per (`reference`, `instance`, `survey`, `period`) as the explicit refoundation target grain
 - pivoted question columns (example: `601`, `701`) with values from long responses
 - contextual contributor columns retained
 
 ### Business rules exercised
 - long-to-wide pivot by `questioncode`
-- merge contributors/responses on `reference/survey/period`
+- merge contributors/responses on `reference/instance/survey/period` to avoid ambiguous duplicate instance columns (`instance_x`/`instance_y`)
 - dedup contextual rows
 - `instance` cast handling in response dataframe
 

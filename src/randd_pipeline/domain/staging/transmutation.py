@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-DEFAULT_UNIQUE_ID_COLUMNS = ["reference", "instance"]
-MERGE_KEYS = ["reference", "survey", "period"]
+DEFAULT_KEY_COLUMNS = ["reference", "instance", "survey", "period"]
 CONTRIBUTOR_DROP_COLUMNS = ["createdby", "createddate", "lastupdatedby"]
 RESPONSE_DROP_COLUMNS = [
     "createdby",
@@ -22,11 +21,11 @@ def _require_columns(df: pd.DataFrame, required: list[str], frame_name: str) -> 
 
 def create_response_dataframe(
     responses: pd.DataFrame,
-    unique_id_columns: list[str],
+    key_columns: list[str],
 ) -> pd.DataFrame:
-    _require_columns(responses, unique_id_columns + ["questioncode", "response"], "responses")
+    _require_columns(responses, key_columns + ["questioncode", "response"], "responses")
     response_df = responses.pivot_table(
-        index=unique_id_columns,
+        index=key_columns,
         columns="questioncode",
         values="response",
         aggfunc="first",
@@ -38,21 +37,21 @@ def create_response_dataframe(
 
 def create_contextual_dataframe(
     merged: pd.DataFrame,
-    unique_id_columns: list[str],
+    key_columns: list[str],
 ) -> pd.DataFrame:
-    _require_columns(merged, unique_id_columns + ["questioncode", "response"], "merged")
+    _require_columns(merged, key_columns + ["questioncode", "response"], "merged")
     return merged.drop(columns=["questioncode", "response"]).drop_duplicates()
 
 
 def build_full_responses(
     contributors: pd.DataFrame,
     responses: pd.DataFrame,
-    unique_id_columns: list[str] | None = None,
+    key_columns: list[str] | None = None,
 ) -> pd.DataFrame:
-    unique_id_columns = unique_id_columns or DEFAULT_UNIQUE_ID_COLUMNS
+    key_columns = key_columns or DEFAULT_KEY_COLUMNS
 
-    _require_columns(contributors, MERGE_KEYS + unique_id_columns, "contributors")
-    _require_columns(responses, MERGE_KEYS + unique_id_columns + ["questioncode", "response"], "responses")
+    _require_columns(contributors, key_columns, "contributors")
+    _require_columns(responses, key_columns + ["questioncode", "response"], "responses")
 
     contributors_trimmed = contributors.drop(columns=CONTRIBUTOR_DROP_COLUMNS, errors="ignore")
     responses_trimmed = responses.drop(columns=RESPONSE_DROP_COLUMNS, errors="ignore")
@@ -60,7 +59,7 @@ def build_full_responses(
     if "instance" in responses_trimmed.columns:
         responses_trimmed = responses_trimmed.astype({"instance": "Int64"})
 
-    merged = contributors_trimmed.merge(responses_trimmed, on=MERGE_KEYS, how="outer")
-    contextual = create_contextual_dataframe(merged, unique_id_columns)
-    response_df = create_response_dataframe(merged, unique_id_columns)
-    return response_df.merge(contextual, on=unique_id_columns, how="outer")
+    merged = contributors_trimmed.merge(responses_trimmed, on=key_columns, how="outer")
+    contextual = create_contextual_dataframe(merged, key_columns)
+    response_df = create_response_dataframe(merged, key_columns)
+    return response_df.merge(contextual, on=key_columns, how="outer")
