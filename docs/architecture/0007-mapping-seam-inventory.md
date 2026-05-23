@@ -218,4 +218,6 @@ Scope of this asset:
 Deliberate non-goals of this PR:
 - Does not port or wrap `run_mapping`.
 - Does not include postcode/ITL, PG conversion, cell-number, PNP, or NI mapping branches.
-- Contract-backed checks for `intermediate.mapped_responses` are deferred to a follow-on PR.
+- Contract-backed checks for `intermediate.mapped_responses` now exist.
+- Checks validate table contract required columns, explicit refoundation grain uniqueness (`reference+instance+survey_type+survey_year`), and populated `ultfoc`.
+- Checks deliberately remain narrower than full legacy mapping QA.
