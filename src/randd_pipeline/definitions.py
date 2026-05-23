@@ -17,6 +17,12 @@ try:
         raw_full_responses_required_columns,
         raw_full_responses_table_exists,
     )
+    from src.randd_pipeline.checks.staging_asset_checks import (
+        staged_responses_non_empty,
+        staged_responses_required_columns,
+        staged_responses_table_exists,
+        staged_responses_unique_grain,
+    )
 except ModuleNotFoundError:  # pragma: no cover - fallback for environments without dagster
     class Definitions:  # type: ignore[override]
         """Lightweight fallback so this module remains importable without Dagster."""
@@ -38,6 +44,10 @@ else:
         raw_full_responses_table_exists,
         raw_full_responses_non_empty,
         raw_full_responses_required_columns,
+        staged_responses_table_exists,
+        staged_responses_non_empty,
+        staged_responses_required_columns,
+        staged_responses_unique_grain,
     ]
 
 

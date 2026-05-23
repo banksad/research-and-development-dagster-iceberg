@@ -81,3 +81,9 @@
 - This proves thin Dagster asset orchestration wired to domain seam execution and `TableStore` materialisation.
 - It is intentionally **not** a full staging migration and **not** a `run_staging` port.
 - Postcode validation, mapper loading, manual files, freezing, and construction concepts remain deliberately out of scope for this first vertical slice.
+
+## Staged responses contract-backed checks
+
+- `staged_responses` now has contract-backed checks for table existence, non-empty output, required columns, and unique grain on `reference + instance + survey_type + survey_year`.
+- These remain smoke/contract checks over the clean transmutation seam.
+- They are not full staging QA and do not cover postcode or mapper validation.
