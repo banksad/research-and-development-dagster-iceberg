@@ -1,0 +1,4 @@
+reference,instance,survey,period,formtype,legalstatus,referencepostcode,createdby,createddate,lastupdatedby
+SYN001,1,BERD,2025,Q,1,ZZ11ZZ,sys,2026-01-01,sys
+SYN002,1,BERD,2025,R,2,ZZ22ZZ,sys,2026-01-01,sys
+SYN003,2,BERD,2025,Q,1,ZZ33ZZ,sys,2026-01-01,sys
