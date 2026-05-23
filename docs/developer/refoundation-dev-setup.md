@@ -108,3 +108,7 @@
 - Foreign ownership mapper is now represented as explicit `ref/ultfoc_mapper` (`ref.ultfoc_mapper`) in the mapping smoke slice.
 - `mapped_responses` now reads mapper data from `TableStore` (`ref.ultfoc_mapper`) instead of direct mapper CSV config.
 - This is still a thin seam slice and not a general mapper-loading framework.
+
+- `ref.ultfoc_mapper` now has contract-backed checks for table existence, non-empty output, required columns, and unique `ruref`.
+- These are reference-input checks for the first foreign ownership mapping seam only.
+- They are not a general reference-data validation framework.

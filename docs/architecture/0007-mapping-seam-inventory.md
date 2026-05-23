@@ -228,3 +228,14 @@ Deliberate non-goals of this PR:
 - `ref.ultfoc_mapper` now exists as the first explicit reference-table input for mapping in the lean refoundation slice.
 - Current scope supports the foreign ownership seam only (`staged_responses` + `ref.ultfoc_mapper` -> `mapped_responses`).
 - General reference-data ingestion and broader mapper-loading frameworks remain out of scope.
+
+
+## 11) Implementation note (PR 033)
+
+Contract-backed checks now exist for `ref.ultfoc_mapper` (asset key `ref/ultfoc_mapper`) covering:
+- table existence,
+- non-empty table output,
+- required columns from table contract,
+- uniqueness at `ruref` grain.
+
+These checks protect the first explicit reference input table for the foreign ownership seam. Blank/null mapper `ultfoc` values remain permitted for now, because the seam currently defaults unresolved/blank/null ownership to `GB`.
