@@ -51,7 +51,7 @@ def _check_messages(check_result) -> list[str]:
 
 
 def test_staged_asset_checks_pass_after_materialisation(tmp_path) -> None:
-    resource = TableStoreResource("staging-check-pass", "local_sql", str(tmp_path / "warehouse"))
+    resource = TableStoreResource(catalog_name="staging-check-pass", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
     defs = _build_defs(resource)
 
     result = defs.get_implicit_global_asset_job_def().execute_in_process(run_config=_staging_run_config())
@@ -62,7 +62,7 @@ def test_staged_asset_checks_pass_after_materialisation(tmp_path) -> None:
 
 
 def test_staged_asset_checks_fail_clearly_when_table_missing(tmp_path) -> None:
-    resource = TableStoreResource("staging-check-missing", "local_sql", str(tmp_path / "warehouse"))
+    resource = TableStoreResource(catalog_name="staging-check-missing", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
     defs = _build_defs(resource)
 
     check_result = defs.get_asset_checks_def(STAGED_RESPONSES_ASSET_KEY).execute_in_process(raise_on_error=False)
@@ -71,7 +71,7 @@ def test_staged_asset_checks_fail_clearly_when_table_missing(tmp_path) -> None:
 
 
 def test_staged_required_columns_check_fails_clearly_when_columns_missing(tmp_path) -> None:
-    resource = TableStoreResource("staging-check-columns", "local_sql", str(tmp_path / "warehouse"))
+    resource = TableStoreResource(catalog_name="staging-check-columns", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
     defs = _build_defs(resource)
 
     store = resource.get_table_store()
@@ -86,7 +86,7 @@ def test_staged_required_columns_check_fails_clearly_when_columns_missing(tmp_pa
 
 
 def test_staged_unique_grain_check_fails_clearly_when_duplicates_present(tmp_path) -> None:
-    resource = TableStoreResource("staging-check-dupes", "local_sql", str(tmp_path / "warehouse"))
+    resource = TableStoreResource(catalog_name="staging-check-dupes", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
     defs = _build_defs(resource)
 
     store = resource.get_table_store()
@@ -111,7 +111,7 @@ def test_staged_checks_attach_to_explicit_asset_key() -> None:
 
 
 def test_staged_checks_do_not_import_legacy_modules(tmp_path) -> None:
-    resource = TableStoreResource("staging-check-import-smoke", "local_sql", str(tmp_path / "warehouse"))
+    resource = TableStoreResource(catalog_name="staging-check-import-smoke", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
     defs = _build_defs(resource)
 
     result = defs.get_implicit_global_asset_job_def().execute_in_process(run_config=_staging_run_config())
