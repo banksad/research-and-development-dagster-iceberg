@@ -1,0 +1,4 @@
+reference,instance,survey_type,survey_year,cellno,ultfoc
+SYN001,1,BERD,2025,101,US
+SYN002,1,BERD,2025,202,GB
+SYN003,1,BERD,2025,,DE
