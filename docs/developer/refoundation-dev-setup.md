@@ -125,3 +125,9 @@
 
 - Cell-number seam checks now include contract-backed checks for `ref/cell_number_mapper` (existence, non-empty, required columns, unique `cellnumber`, inclusive range 1..817) and `intermediate/cell_number_mapped_responses` (existence, non-empty, required columns, unique grain, mapped metadata populated where `cellno` is non-null).
 - This remains a narrow cell-number seam quality gate and is not full mapping QA coverage.
+
+## Canonical mapped-output contract transition note
+
+- `intermediate.mapped_responses` is now the documented canonical mapped-output contract for the current implemented v1 mapping scope.
+- Runtime consolidation is still pending in a follow-up implementation PR; current runtime behavior may still materialize seam-by-seam intermediates first.
+- `intermediate.cell_number_mapped_responses` remains a temporary/checkpoint mapped table during this transition unless explicitly retained as a debug asset.

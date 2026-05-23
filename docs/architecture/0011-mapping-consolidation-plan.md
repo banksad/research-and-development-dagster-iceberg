@@ -154,6 +154,12 @@ For the current scope, expected required fields include:
 
 This planning PR does **not** implement those contract changes.
 
+## Implementation-transition note
+
+- The canonical `intermediate.mapped_responses` table contract has now been updated ahead of runtime consolidation implementation.
+- This intentionally creates a short transition period where the contract documents the target v1 semantics while runtime behavior still reflects the current seam-by-seam implementation.
+- The next implementation PR should refactor `mapped_responses` to satisfy the expanded canonical contract.
+
 ## Test strategy
 
 Future implementation PRs should follow a migration path that preserves confidence while changing canonical semantics:
