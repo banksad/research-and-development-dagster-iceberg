@@ -12,6 +12,7 @@ from src.randd_pipeline.io.table_store import TableStore
 
 try:
     from dagster import ConfigurableResource
+    from pydantic import Field
 except ModuleNotFoundError:  # pragma: no cover - fallback for environments without dagster
     @dataclass
     class TableStoreResource:
@@ -48,7 +49,7 @@ else:
         catalog_type: Literal["local_sql", "rest"]
         warehouse: str | None = None
         uri: str | None = None
-        properties: dict[str, str] = field(default_factory=dict)
+        properties: dict[str, str] = Field(default_factory=dict)
 
         def get_table_store(self) -> TableStore:
             """Construct a table-store instance from resource configuration."""
