@@ -56,6 +56,28 @@ Typical traits:
 Expected action:
 - keep temporarily behind explicit deprecation boundary while equivalent managed input assets are introduced.
 
+
+## Concrete inventory seed (from current repository)
+The table below is a starting point for Phase A and should be maintained as migration work progresses.
+
+| Element | Current location(s) | Category | Why | Suggested replacement/next step | Owner | Removal criterion |
+| --- | --- | --- | --- | --- | --- | --- |
+| Multi-mode freezing run switches | `src/user_config.yaml` (`run_with_snapshot`, `run_with_snapshot_and_freeze`, `load_updated_snapshot_for_comparison`, `run_updates_and_freeze`, `run_with_frozen_data`) and `src/utils/config.py` validation | Replace | Encodes orchestration state in file-era booleans; creates combinatorial config complexity. | Replace with a reduced Dagster run-intent contract and partition/snapshot parameters. | Data Platform | New run-intent contract adopted and legacy booleans no longer required in two consecutive monthly runs. |
+| Frozen CSV as canonical operational input/output | `src/freezing/freezing_main.py` (`read_frozen_csv`, staged frozen writes) plus `freezing_paths` config in `src/dev_config.yaml`/`src/user_config.yaml` | Replace | Point-in-time persistence represented by files instead of table snapshots. | Read/write canonical frozen-state via Iceberg tables; keep CSV only as optional export. | Data Platform | Iceberg frozen-state assets are canonical and CSV files are confirmed export-only for two consecutive monthly runs. |
+| Changes-to-review CSV outputs | `src/freezing/freezing_compare.py` (`output_freezing_files`) | Transitional shim | Useful human review UX but should not be canonical persistence contract. | Materialize review diffs as an asset/check output first; keep CSV export optional. | R&D Methods | Equivalent review asset/check consumed by users, with CSV dependency removed from operational runbook. |
+| Manual application of freezing amendments/additions/deletions | `src/freezing/freezing_apply_changes.py` | Transitional shim | User-edited CSV ingestion is operationally useful but file-centric and hard to govern. | Introduce managed correction input assets and migrate apply path to table-aware merge/update semantics. | R&D Methods + Data Platform | Managed correction asset path is live and audited; CSV edit/apply path unused for two consecutive monthly runs. |
+| Reconciliation comparison logic (amendments/additions/deletions) | `src/freezing/freezing_compare.py` (`run_comparison`, `get_amendments`, `get_additions_deletions`) | Keep (relocate) | Comparison logic is still needed to prove equivalence/drift. | Retain logic and run as Dagster asset checks over Iceberg-backed inputs. | Data Quality | Checks are materialized in Dagster and pass agreed tolerances for two consecutive monthly runs. |
+| Row-level `last_frozen` metadata stamping | `src/freezing/freezing_utils.py` (`_add_last_frozen_column`) | Replace (or compatibility shim) | Snapshot identity can be represented by Iceberg metadata instead of in-row date/run-id strings. | Use Iceberg snapshot/tag metadata as source of truth; keep column only where downstream compatibility requires it. | Data Platform | Downstream consumers confirm no dependency on row-level stamp, or compatibility column maintained via explicit export transform. |
+| Construction run toggles and path-coupled validation | `src/user_config.yaml` (`run_all_data_construction`, `run_postcode_construction`, `run_ni_construction`), `src/utils/config.py`, `src/construction/construction_main.py` | Mixed: keep+replace | Some flags are orchestration concerns; construction transforms may encode valid business interventions. | Keep business transforms; move run selection to Dagster configuration and progressively reduce path-coupled switches. | R&D Methods + Data Platform | Construction transforms remain numerically equivalent while orchestration flags are reduced to Dagster run-intent parameters. |
+| Directory scaffolding for `02_freezing` and `04_construction` | `helpers/make_network_dirs_main.py`, `helpers/make_s3_dirs_main.py` | Replace | Hard-codes file-era operational layout into bootstrap scripts. | Restrict to optional export dirs only; remove as mandatory runtime prerequisite. | Platform Ops | Production runbooks no longer require creating these folders as preconditions. |
+
+## Initial PR backlog (small, reversible)
+1. **PR A1 (doc/catalogue):** add owner + removal criterion columns to this table and agree an acceptance window for deprecations.
+2. **PR A2 (checks):** expose freezing comparison outputs as Dagster reconciliation checks (no business-logic rewrite).
+3. **PR A3 (persistence):** add Iceberg-backed frozen-state asset read/write path behind feature flag; preserve CSV export path.
+4. **PR A4 (config simplification):** add reduced run-intent interface; map legacy flags with explicit deprecation warnings.
+5. **PR A5 (cleanup):** remove obsolete freezing/construction file-path validation and scaffolding once checks are green for agreed windows.
+
 ## Proposed phased rollout
 
 ### Phase A: audit + contract definition (doc-first)
@@ -97,3 +119,9 @@ A candidate can be removed when all are true:
 2. Reconciliation checks pass for agreed run windows.
 3. Operational owner confirms no active dependence on legacy path.
 4. Rollback path is documented and tested.
+
+
+## Acceptance window for deprecation decisions
+To keep removals reversible and evidence-based, each candidate above should meet its removal criterion for **two consecutive monthly production runs** before deletion.
+
+For planning clarity based on this document date (**May 23, 2026**), the earliest default removal window is after successful **June 2026** and **July 2026** runs, with removals targeted from **August 2026** onward unless owners explicitly agree otherwise.
