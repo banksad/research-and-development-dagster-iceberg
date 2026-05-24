@@ -34,6 +34,7 @@ The smoke path validates checks across major seams, including:
 ## Where manual operational inputs appear
 
 - `ops.manual_outliers`: manual operator/methodologist intervention for outlier decisions.
+  - Local demo definitions intentionally include this CSV helper asset so the committed full synthetic v1 run config can materialise `ops.manual_outliers` from fixtures.
 - `ref.site_apportionment_factors`: explicit site split factors used to allocate estimated values.
 
 ## Final curated output meaning

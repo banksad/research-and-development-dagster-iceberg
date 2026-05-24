@@ -23,6 +23,32 @@ def test_local_demo_definitions_register_table_store_resource(monkeypatch):
     assert table_store_resource.warehouse == ".tmp/custom-warehouse"
 
 
+def test_local_demo_definitions_include_expected_full_synthetic_v1_assets():
+    dagster = pytest.importorskip("dagster")
+
+    from src.randd_pipeline import local_demo_definitions
+
+    expected_asset_keys = {
+        dagster.AssetKey(["raw", "full_responses"]),
+        dagster.AssetKey(["intermediate", "staged_responses"]),
+        dagster.AssetKey(["ref", "ultfoc_mapper"]),
+        dagster.AssetKey(["ref", "cell_number_mapper"]),
+        dagster.AssetKey(["ops", "manual_outliers"]),
+        dagster.AssetKey(["ref", "site_apportionment_factors"]),
+        dagster.AssetKey(["intermediate", "mapped_responses"]),
+        dagster.AssetKey(["intermediate", "imputed_responses"]),
+        dagster.AssetKey(["intermediate", "outlier_adjusted_responses"]),
+        dagster.AssetKey(["intermediate", "estimated_responses"]),
+        dagster.AssetKey(["intermediate", "site_apportioned_responses"]),
+        dagster.AssetKey(["curated", "rnd_statistics"]),
+    }
+
+    asset_graph = local_demo_definitions.defs.resolve_asset_graph()
+    available_asset_keys = set(asset_graph.get_all_asset_keys())
+
+    assert expected_asset_keys <= available_asset_keys
+
+
 def test_full_synthetic_v1_run_config_is_fixture_only_and_expected_shape():
     config_path = Path("config/dagster/full_synthetic_v1_run_config.yaml")
     assert config_path.exists()
@@ -53,3 +79,18 @@ def test_full_synthetic_v1_run_config_is_fixture_only_and_expected_shape():
             assert "s3://" not in value
             assert "secret" not in value.lower()
             assert "prod" not in value.lower()
+
+
+def test_full_synthetic_v1_run_config_ops_are_available_in_local_demo_definitions():
+    pytest.importorskip("dagster")
+    yaml = pytest.importorskip("yaml")
+
+    from src.randd_pipeline import local_demo_definitions
+
+    config_path = Path("config/dagster/full_synthetic_v1_run_config.yaml")
+    payload = yaml.safe_load(config_path.read_text())
+    configured_ops = set(payload.get("ops", {}))
+
+    available_op_names = {asset_def.op.name for asset_def in local_demo_definitions.defs.assets}
+
+    assert configured_ops <= available_op_names
