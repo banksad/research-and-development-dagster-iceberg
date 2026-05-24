@@ -49,10 +49,14 @@ def test_row_count_grain_and_input_immutability_preserved() -> None:
 
 def test_zero_denominator_and_no_eligible_rows_default_to_one_weights() -> None:
     df = load_scenario_csv("outlier_to_estimation_minimal", "input_outlier_adjusted_responses.csv")
+
     zero_denom = df.copy()
-    zero_denom["uni_count"] = 0
+    cell_mask = (zero_denom["cellnumber"] == 100) & (zero_denom["selectiontype"] == "P")
+    zero_denom.loc[cell_mask, "outlier"] = True
     out_zero = calculate_minimal_estimation_weights(zero_denom)
-    assert (out_zero[["a_weight", "g_weight"]] == 1.0).all().all()
+
+    # In this cell, all estimation-eligible rows are outliers, so n == o and n - o == 0.
+    assert (out_zero.loc[cell_mask, ["a_weight", "g_weight"]] == 1.0).all().all()
 
     no_eligible = df.copy()
     no_eligible["selectiontype"] = "X"
