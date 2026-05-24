@@ -106,3 +106,30 @@ def test_default_definitions_include_site_apportioned_asset_and_dependencies():
     deps = {tuple(dep.path) for dep in asset_key_paths[("intermediate", "site_apportioned_responses")].dependency_keys}
     assert ("intermediate", "estimated_responses") in deps
     assert ("ref", "site_apportionment_factors") in deps
+
+
+def test_default_definitions_include_site_assets_and_checks():
+    pytest.importorskip("dagster")
+    asset_key_paths = {tuple(asset_def.key.path): asset_def for asset_def in definitions.defs.assets}
+    check_names = {check_def.name for check_def in definitions.defs.asset_checks}
+    assert ("ref", "site_apportionment_factors") in asset_key_paths
+    assert ("intermediate", "site_apportioned_responses") in asset_key_paths
+    for name in [
+        "site_apportioned_responses_table_exists",
+        "site_apportioned_responses_non_empty",
+        "site_apportioned_responses_required_columns",
+        "site_apportioned_responses_unique_site_grain",
+        "site_apportioned_responses_site_identifier_populated",
+        "site_apportioned_responses_site_proportion_populated",
+        "site_apportioned_responses_apportioned_values_non_negative",
+        "site_apportionment_factors_table_exists",
+        "site_apportionment_factors_required_columns",
+        "site_apportionment_factors_unique_site_grain",
+        "site_apportionment_factors_site_identifier_populated",
+        "site_apportionment_factors_proportions_sum_to_one",
+    ]:
+        assert name in check_names
+
+    deps = {tuple(dep.path) for dep in asset_key_paths[("intermediate", "site_apportioned_responses")].dependency_keys}
+    assert ("intermediate", "estimated_responses") in deps
+    assert ("ref", "site_apportionment_factors") in deps

@@ -83,6 +83,11 @@ try:
         site_apportioned_responses_site_identifier_populated,
         site_apportioned_responses_site_proportion_populated,
         site_apportioned_responses_apportioned_values_non_negative,
+        site_apportionment_factors_table_exists,
+        site_apportionment_factors_required_columns,
+        site_apportionment_factors_unique_site_grain,
+        site_apportionment_factors_site_identifier_populated,
+        site_apportionment_factors_proportions_sum_to_one,
     )
     from src.randd_pipeline.checks.staging_asset_checks import (
         staged_responses_non_empty,
@@ -162,6 +167,11 @@ else:
         site_apportioned_responses_site_identifier_populated,
         site_apportioned_responses_site_proportion_populated,
         site_apportioned_responses_apportioned_values_non_negative,
+        site_apportionment_factors_table_exists,
+        site_apportionment_factors_required_columns,
+        site_apportionment_factors_unique_site_grain,
+        site_apportionment_factors_site_identifier_populated,
+        site_apportionment_factors_proportions_sum_to_one,
         cell_number_mapper_table_exists,
         cell_number_mapper_non_empty,
         cell_number_mapper_required_columns,
