@@ -323,3 +323,9 @@ Likely blocking in production-like policy:
 - No tests changed.
 - No assets/checks/contracts changed.
 - Open as draft PR against `develop`.
+
+
+## Implementation update: explicit-factor seam landed
+- The first explicit-factor seam now consumes `intermediate.estimated_responses` plus `ref.site_apportionment_factors` and materialises `intermediate.site_apportioned_responses` at response+site grain.
+- Included scope: deterministic one-to-many expansion by site factors and proportional value apportionment.
+- Excluded scope: legacy percentage inference, postcode/local-unit handling, product/category grain, QA/diagnostic tables, and final outputs.

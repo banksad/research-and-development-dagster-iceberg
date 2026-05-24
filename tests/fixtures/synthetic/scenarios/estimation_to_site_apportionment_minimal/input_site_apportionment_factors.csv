@@ -1,0 +1,4 @@
+survey_year,survey_type,reference,instance,site_id,site_proportion
+2024,BERD,SYN001,0,SITE_A,0.6
+2024,BERD,SYN001,0,SITE_B,0.4
+2024,BERD,SYN002,0,SITE_C,1.0

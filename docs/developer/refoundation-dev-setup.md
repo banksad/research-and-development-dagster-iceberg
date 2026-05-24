@@ -174,3 +174,9 @@
 
 A first minimal estimation seam now exists. It calculates `a_weight` and `g_weight`, consumes `intermediate.outlier_adjusted_responses`, and materialises `intermediate.estimated_responses`. This is not full legacy estimation, does not yet apply weights to all output variables, and site apportionment/final outputs remain future work.
 The production-facing Dagster chain now declares explicit dependencies through this stage so the UI graph is visible end-to-end: `raw.full_responses -> intermediate.staged_responses -> intermediate.mapped_responses -> intermediate.imputed_responses -> intermediate.outlier_adjusted_responses -> intermediate.estimated_responses`.
+
+
+## Minimal site apportionment seam (v1)
+- A first minimal seam now materialises `intermediate.site_apportioned_responses` from `intermediate.estimated_responses` and `ref.site_apportionment_factors`.
+- This seam uses explicit site proportions only.
+- It does not implement legacy postcode inference, marker filtering, or QA CSV outputs.
