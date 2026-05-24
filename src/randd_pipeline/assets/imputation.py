@@ -89,7 +89,10 @@ else:
                 raise ValueError("Status values must be unique within each status list.")
             return cleaned
 
-    @asset(key=AssetKey(["intermediate", "imputed_responses"]))
+    @asset(
+        key=AssetKey(["intermediate", "imputed_responses"]),
+        deps=[AssetKey(["intermediate", "mapped_responses"])],
+    )
     def imputed_responses(table_store: TableStoreResource, config: SimpleTmiImputationConfig) -> dict[str, Any]:
         store = table_store.get_table_store()
         mapped = store.read_table_as_dataframe(refs.INTERMEDIATE_MAPPED_RESPONSES)

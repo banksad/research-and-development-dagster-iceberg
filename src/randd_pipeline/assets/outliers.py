@@ -47,7 +47,10 @@ else:
         materialise_manual_outliers(store, manual, overwrite=False)
         return {"table": refs.OPS_MANUAL_OUTLIERS, "row_count": int(len(manual)), "column_count": int(len(manual.columns))}
 
-    @asset(key=AssetKey(["intermediate", "outlier_adjusted_responses"]))
+    @asset(
+        key=AssetKey(["intermediate", "outlier_adjusted_responses"]),
+        deps=[AssetKey(["intermediate", "imputed_responses"])],
+    )
     def outlier_adjusted_responses(table_store: TableStoreResource, config: ManualOutlierAdjustmentConfig) -> dict[str, Any]:
         store = table_store.get_table_store()
         imputed = store.read_table_as_dataframe(refs.INTERMEDIATE_IMPUTED_RESPONSES)

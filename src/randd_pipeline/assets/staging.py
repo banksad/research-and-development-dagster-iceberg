@@ -92,6 +92,7 @@ else:
 
     @asset(
         key=AssetKey(["intermediate", "staged_responses"]),
+        deps=[AssetKey(["raw", "full_responses"])],
         config_schema={
             "contributors_csv_path": str,
             "responses_long_csv_path": str,

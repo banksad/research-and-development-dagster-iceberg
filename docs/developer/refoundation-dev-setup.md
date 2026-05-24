@@ -173,3 +173,4 @@
 ## Minimal estimation seam status
 
 A first minimal estimation seam now exists. It calculates `a_weight` and `g_weight`, consumes `intermediate.outlier_adjusted_responses`, and materialises `intermediate.estimated_responses`. This is not full legacy estimation, does not yet apply weights to all output variables, and site apportionment/final outputs remain future work.
+The production-facing Dagster chain now declares explicit dependencies through this stage so the UI graph is visible end-to-end: `raw.full_responses -> intermediate.staged_responses -> intermediate.mapped_responses -> intermediate.imputed_responses -> intermediate.outlier_adjusted_responses -> intermediate.estimated_responses`.
