@@ -180,3 +180,8 @@ The production-facing Dagster chain now declares explicit dependencies through t
 - A first minimal seam now materialises `intermediate.site_apportioned_responses` from `intermediate.estimated_responses` and `ref.site_apportionment_factors`.
 - This seam uses explicit site proportions only.
 - It does not implement legacy postcode inference, marker filtering, or QA CSV outputs.
+
+- `ref.site_apportionment_factors` is the explicit reference input for the minimal site apportionment seam.
+- `intermediate.site_apportioned_responses` is the production-facing site stage in current refoundation scope.
+- Only explicit site proportions are currently supported.
+- Postcode inference, marker filtering, QA CSVs, and final outputs are not yet implemented.

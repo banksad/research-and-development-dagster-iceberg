@@ -86,7 +86,7 @@ contracts:
     table: site_apportionment_factors
     description: Explicit site apportionment proportions at response+site grain for minimal v1 seam.
     layer: ref
-    owner: randd-reference-data
+    owner: randd-methodology
     expected_grain: reference + instance + survey_type + survey_year + site_id
     primary_key: null
     partition_by: [survey_year, survey_type]

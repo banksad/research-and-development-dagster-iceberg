@@ -329,3 +329,9 @@ Likely blocking in production-like policy:
 - The first explicit-factor seam now consumes `intermediate.estimated_responses` plus `ref.site_apportionment_factors` and materialises `intermediate.site_apportioned_responses` at response+site grain.
 - Included scope: deterministic one-to-many expansion by site factors and proportional value apportionment.
 - Excluded scope: legacy percentage inference, postcode/local-unit handling, product/category grain, QA/diagnostic tables, and final outputs.
+
+
+## Implementation hardening update
+- The explicit-factor site-apportionment seam is now landed for `estimated_responses + site_apportionment_factors -> site_apportioned_responses`.
+- Hardening coverage now includes factor validity, output grain, site identifiers, proportion quality, and non-negative apportioned value checks.
+- Follow-up scope remains legacy percentage inference/postcode handling/product-grain/final outputs.
