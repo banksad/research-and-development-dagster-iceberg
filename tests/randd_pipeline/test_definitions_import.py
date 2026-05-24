@@ -98,3 +98,11 @@ def test_default_definitions_exclude_manual_outliers_csv_loader_asset():
     pytest.importorskip("dagster")
     asset_key_paths = {tuple(asset_def.key.path) for asset_def in definitions.defs.assets}
     assert ("ops", "manual_outliers") not in asset_key_paths
+
+def test_default_definitions_include_site_apportioned_asset_and_dependencies():
+    pytest.importorskip("dagster")
+    asset_key_paths = {tuple(asset_def.key.path): asset_def for asset_def in definitions.defs.assets}
+    assert ("intermediate", "site_apportioned_responses") in asset_key_paths
+    deps = {tuple(dep.path) for dep in asset_key_paths[("intermediate", "site_apportioned_responses")].dependency_keys}
+    assert ("intermediate", "estimated_responses") in deps
+    assert ("ref", "site_apportionment_factors") in deps

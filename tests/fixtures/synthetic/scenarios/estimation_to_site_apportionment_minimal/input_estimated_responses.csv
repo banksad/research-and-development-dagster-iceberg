@@ -1,0 +1,3 @@
+survey_year,survey_type,reference,instance,211,a_weight,g_weight,outlier
+2024,BERD,SYN001,0,100,1.0,1.0,False
+2024,BERD,SYN002,0,50,1.0,1.0,False

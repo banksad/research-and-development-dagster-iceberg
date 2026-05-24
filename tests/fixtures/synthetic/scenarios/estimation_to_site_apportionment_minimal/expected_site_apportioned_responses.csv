@@ -1,0 +1,4 @@
+survey_year,survey_type,reference,instance,211,a_weight,g_weight,outlier,site_id,site_proportion,211_apportioned,apportionment_method,factor_source
+2024,BERD,SYN001,0,100,1.0,1.0,False,SITE_A,0.6,60.0,explicit_site_factor,ref.site_apportionment_factors
+2024,BERD,SYN001,0,100,1.0,1.0,False,SITE_B,0.4,40.0,explicit_site_factor,ref.site_apportionment_factors
+2024,BERD,SYN002,0,50,1.0,1.0,False,SITE_C,1.0,50.0,explicit_site_factor,ref.site_apportionment_factors

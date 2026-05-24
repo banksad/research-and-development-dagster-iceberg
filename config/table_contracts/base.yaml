@@ -81,6 +81,21 @@ contracts:
     notes:
       - "CSV ingestion may accept legacy-shaped columns cell_no and UNI_Count, but this table is canonicalised to cellnumber and uni_count."
 
+  - identifier: ref.site_apportionment_factors
+    namespace: ref
+    table: site_apportionment_factors
+    description: Explicit site apportionment proportions at response+site grain for minimal v1 seam.
+    layer: ref
+    owner: randd-reference-data
+    expected_grain: reference + instance + survey_type + survey_year + site_id
+    primary_key: null
+    partition_by: [survey_year, survey_type]
+    required_columns: [survey_year, survey_type, reference, instance, site_id, site_proportion]
+    notes:
+      - "Explicit reference input for minimal v1 site apportionment seam."
+      - "Proportions should sum to 1.0 by response grain."
+      - "Synthetic/local v1 input only for now; provenance/effective dating can be added later."
+
   - identifier: ref.postcode_mapper
     namespace: ref
     table: postcode_mapper
@@ -303,12 +318,14 @@ contracts:
     description: Site-apportioned response outputs after estimation.
     layer: intermediate
     owner: randd-methodology
-    expected_grain: reference + instance + site + survey_year + survey_type
+    expected_grain: reference + instance + survey_type + survey_year + site_id
     primary_key: null
     partition_by: [survey_year, survey_type]
-    required_columns: [survey_year, survey_type, reference, instance]
+    required_columns: [survey_year, survey_type, reference, instance, site_id, site_proportion, apportionment_method, factor_source, 211_apportioned]
     notes:
-      - "TODO: Confirm site key column naming and uniqueness contract."
+      - "Minimal v1 explicit-factor site apportionment seam only."
+      - "No postcode inference, legacy marker filtering, or QA CSV outputs."
+      - "Grain is canonical response grain plus site_id."
 
   - identifier: mart.short_form
     namespace: mart

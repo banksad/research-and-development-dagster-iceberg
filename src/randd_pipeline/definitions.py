@@ -20,6 +20,11 @@ try:
         ultfoc_mapper,
     )
     from src.randd_pipeline.assets.staging import staged_responses
+
+    from src.randd_pipeline.assets.site_apportionment import (
+        site_apportionment_factors,
+        site_apportioned_responses,
+    )
     from src.randd_pipeline.checks.raw_input_checks import (
         raw_full_responses_non_empty,
         raw_full_responses_required_columns,
@@ -69,6 +74,16 @@ try:
         ultfoc_mapper_table_exists,
         ultfoc_mapper_unique_ruref,
     )
+    
+    from src.randd_pipeline.checks.site_apportionment_asset_checks import (
+        site_apportioned_responses_table_exists,
+        site_apportioned_responses_non_empty,
+        site_apportioned_responses_required_columns,
+        site_apportioned_responses_unique_site_grain,
+        site_apportioned_responses_site_identifier_populated,
+        site_apportioned_responses_site_proportion_populated,
+        site_apportioned_responses_apportioned_values_non_negative,
+    )
     from src.randd_pipeline.checks.staging_asset_checks import (
         staged_responses_non_empty,
         staged_responses_required_columns,
@@ -99,6 +114,8 @@ else:
         imputed_responses,
         outlier_adjusted_responses,
         estimated_responses,
+        site_apportionment_factors,
+        site_apportioned_responses,
         cell_number_mapper,
     ]
     _asset_checks = [
@@ -138,6 +155,13 @@ else:
         estimated_responses_unique_grain,
         estimated_responses_weights_populated,
         estimated_responses_weights_positive,
+        site_apportioned_responses_table_exists,
+        site_apportioned_responses_non_empty,
+        site_apportioned_responses_required_columns,
+        site_apportioned_responses_unique_site_grain,
+        site_apportioned_responses_site_identifier_populated,
+        site_apportioned_responses_site_proportion_populated,
+        site_apportioned_responses_apportioned_values_non_negative,
         cell_number_mapper_table_exists,
         cell_number_mapper_non_empty,
         cell_number_mapper_required_columns,
