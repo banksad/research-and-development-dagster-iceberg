@@ -1,0 +1,4 @@
+name: site_apportionment_to_curated_output_minimal
+description: Tiny synthetic seam from intermediate.site_apportioned_responses to curated.rnd_statistics.
+source_table: intermediate.site_apportioned_responses
+target_table: curated.rnd_statistics

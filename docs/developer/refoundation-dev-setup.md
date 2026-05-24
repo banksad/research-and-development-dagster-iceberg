@@ -185,3 +185,6 @@ The production-facing Dagster chain now declares explicit dependencies through t
 - `intermediate.site_apportioned_responses` is the production-facing site stage in current refoundation scope.
 - Only explicit site proportions are currently supported.
 - Postcode inference, marker filtering, QA CSVs, and final outputs are not yet implemented.
+
+- Minimal curated output seam now implemented: `intermediate.site_apportioned_responses` -> `curated.rnd_statistics` as the canonical table-backed v1 output.
+- CSV/Excel/API dissemination layers remain future work and are intentionally not implemented in this seam.

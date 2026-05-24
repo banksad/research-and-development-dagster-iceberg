@@ -365,3 +365,26 @@ contracts:
     required_columns: [survey_year, survey_type]
     notes:
       - "TODO: Confirm intram totals grain and publication schema."
+
+  - identifier: curated.rnd_statistics
+    namespace: curated
+    table: rnd_statistics
+    description: Canonical curated statistical output table for minimal v1 refoundation seam.
+    layer: curated
+    owner: randd-methodology
+    expected_grain: survey_year + survey_type + output_measure
+    primary_key: null
+    partition_by: [survey_year]
+    required_columns:
+      - survey_year
+      - survey_type
+      - output_measure
+      - output_value
+      - source_table_identifier
+      - source_snapshot_id
+      - pipeline_run_id
+    notes:
+      - "First minimal curated Iceberg-style output seam in the lean refoundation pipeline."
+      - "Consumes intermediate.site_apportioned_responses and materialises curated.rnd_statistics."
+      - "CSV/Excel/API dissemination layers are downstream and intentionally not implemented here."
+      - "source_snapshot_id and pipeline_run_id may be null placeholders in local/synthetic v1 runs."

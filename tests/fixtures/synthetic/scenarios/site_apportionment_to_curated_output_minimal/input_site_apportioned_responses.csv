@@ -1,0 +1,4 @@
+survey_year,survey_type,reference,instance,site_id,site_proportion,211_apportioned
+2024,BERD,1001,1,S1,0.6,120
+2024,BERD,1001,1,S2,0.4,80
+2025,GBERD,2001,1,S1,1.0,50

@@ -1,0 +1,3 @@
+survey_year,survey_type,output_measure,output_value,source_table_identifier,source_snapshot_id,pipeline_run_id
+2024,BERD,total_211_apportioned,200,intermediate.site_apportioned_responses,,
+2025,GBERD,total_211_apportioned,50,intermediate.site_apportioned_responses,,
