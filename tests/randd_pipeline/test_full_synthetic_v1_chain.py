@@ -29,6 +29,8 @@ outlier_checks_mod = importlib.import_module("src.randd_pipeline.checks.outlier_
 estimation_checks_mod = importlib.import_module("src.randd_pipeline.checks.estimation_asset_checks")
 site_checks_mod = importlib.import_module("src.randd_pipeline.checks.site_apportionment_asset_checks")
 curated_checks_mod = importlib.import_module("src.randd_pipeline.checks.curated_statistics_asset_checks")
+raw_checks_mod = importlib.import_module("src.randd_pipeline.checks.raw_input_checks")
+ref_checks_mod = importlib.import_module("src.randd_pipeline.checks.ref_asset_checks")
 
 
 def test_full_synthetic_v1_chain_materialises_once_and_checks_pass(tmp_path):
@@ -58,12 +60,8 @@ def test_full_synthetic_v1_chain_materialises_once_and_checks_pass(tmp_path):
             "raw_full_responses": {"config": {"csv_path": str(fixture_dir / "input_raw_full_responses.csv")}},
             "staged_responses": {
                 "config": {
-                    "contributors_csv_path": str(
-                        scenario_path("staging_to_cell_number_mapping_minimal") / "contributors.csv"
-                    ),
-                    "responses_long_csv_path": str(
-                        scenario_path("staging_to_cell_number_mapping_minimal") / "responses_long.csv"
-                    ),
+                    "contributors_csv_path": str(fixture_dir / "input_staging_contributors.csv"),
+                    "responses_long_csv_path": str(fixture_dir / "input_staging_responses_long.csv"),
                 }
             },
             "ultfoc_mapper": {"config": {"ultfoc_mapper_csv_path": str(fixture_dir / "input_ref_ultfoc_mapper.csv")}},
@@ -94,6 +92,18 @@ def test_full_synthetic_v1_chain_materialises_once_and_checks_pass(tmp_path):
         assert store.table_exists(table)
 
     for fn in [
+        raw_checks_mod.raw_full_responses_table_exists,
+        raw_checks_mod.raw_full_responses_non_empty,
+        raw_checks_mod.raw_full_responses_required_columns,
+        ref_checks_mod.ultfoc_mapper_table_exists,
+        ref_checks_mod.ultfoc_mapper_non_empty,
+        ref_checks_mod.ultfoc_mapper_required_columns,
+        ref_checks_mod.ultfoc_mapper_unique_ruref,
+        ref_checks_mod.cell_number_mapper_table_exists,
+        ref_checks_mod.cell_number_mapper_non_empty,
+        ref_checks_mod.cell_number_mapper_required_columns,
+        ref_checks_mod.cell_number_mapper_unique_cellnumber,
+        ref_checks_mod.cell_number_mapper_cellnumber_range,
         staging_checks_mod.staged_responses_table_exists,
         staging_checks_mod.staged_responses_non_empty,
         staging_checks_mod.staged_responses_required_columns,
