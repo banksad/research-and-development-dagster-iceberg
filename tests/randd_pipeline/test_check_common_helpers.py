@@ -73,3 +73,12 @@ def test_group_sum_close_to_non_numeric_and_missing_columns_fail_clearly():
     missing = pd.DataFrame({"g": ["A"], "x": [1]})
     ok, msg = check_group_sum_close_to(missing, ["g"], "v")
     assert not ok and "missing columns" in msg
+
+
+def test_group_sum_close_to_accepts_group_columns_generator():
+    df = pd.DataFrame({"g": ["A", "A", "B", "B"], "v": [0.2, 0.8, 0.4, 0.6]})
+    group_cols = (c for c in ["g"])
+
+    ok, _ = check_group_sum_close_to(df, group_cols, "v", expected=1.0)
+
+    assert ok

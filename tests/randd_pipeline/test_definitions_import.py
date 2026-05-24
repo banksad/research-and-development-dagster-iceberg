@@ -133,3 +133,10 @@ def test_default_definitions_include_site_assets_and_checks():
     deps = {tuple(dep.path) for dep in asset_key_paths[("intermediate", "site_apportioned_responses")].dependency_keys}
     assert ("intermediate", "estimated_responses") in deps
     assert ("ref", "site_apportionment_factors") in deps
+
+
+def test_asset_check_helper_read_table_for_check_importable():
+    pytest.importorskip("pandas")
+    from src.randd_pipeline.checks.asset_check_helpers import read_table_for_check
+
+    assert callable(read_table_for_check)
