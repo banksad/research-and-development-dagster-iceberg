@@ -67,7 +67,8 @@ def test_reconciliation_positive_and_negative_cases():
     assert not check_curated_rnd_statistics_reconciles_to_site_input(_curated(), bad_site)[0]
     assert not check_curated_rnd_statistics_reconciles_to_site_input(_curated(), _site().drop(columns=["survey_type"]))[0]
     assert not check_curated_rnd_statistics_reconciles_to_site_input(_curated().drop(columns=["output_measure"]), _site())[0]
-    site_missing_group = _site()[~((_site()["survey_year"] == 2025) & (_site()["survey_type"] == "BERD"))]
+    site = _site()
+    site_missing_group = site[~((site["survey_year"] == 2025) & (site["survey_type"] == "GBERD"))]
     assert not check_curated_rnd_statistics_reconciles_to_site_input(_curated(), site_missing_group)[0]
     bad_totals = _curated(); bad_totals.loc[bad_totals["survey_year"] == 2024, "output_value"] = 0
     assert not check_curated_rnd_statistics_reconciles_to_site_input(bad_totals, _site())[0]
