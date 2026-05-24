@@ -1,0 +1,6 @@
+survey_year,survey_type,reference,instance,cellnumber,uni_count,uni_employment,employment,outlier,selectiontype,formtype,status,709,outlier_source,outlier_adjustment_applied,outlier_reason
+2024,BERD,SYN001,0,100,5,90,10,False,P,0006,Clear,1,auto,False,
+2024,BERD,SYN002,0,100,5,90,20,False,P,0006,Clear,1,auto,False,
+2024,BERD,SYN003,0,100,5,90,30,True,P,0006,Clear,1,manual_outlier,True,Synthetic outlier
+2024,BERD,SYN004,0,200,1,40,15,False,P,0006,Clear,1,auto,False,
+2024,BERD,SYN005,0,100,5,90,8,False,C,0006,Clear,1,auto,False,
