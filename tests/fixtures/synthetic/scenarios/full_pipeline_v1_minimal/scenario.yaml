@@ -1,0 +1,5 @@
+id: full_pipeline_v1_minimal
+description: Full local synthetic v1 smoke scenario from raw/ref/ops through curated output.
+notes:
+  - Tiny synthetic records only.
+  - Curated output is canonical table result.

@@ -285,3 +285,9 @@ No snapshot-management implementation is introduced in this PR.
 - Future API/export layers must treat curated table snapshots as source of truth and remain downstream of the curated seam.
 - It provides a first canonical curated table output only; it does **not** implement legacy output runners, CSV/Excel exports, API serving, or publication workflow.
 - Follow-up areas: additional measures, richer output dimensions, release/snapshot tagging, optional CSV/Excel export, and API/serving layer.
+
+## Implementation status note (2026-05-24)
+
+- The minimal curated output seam is now hardened with synthetic fixture coverage and asset checks.
+- A full local synthetic v1 smoke path now exists across raw/ref/ops inputs through `curated.rnd_statistics`.
+- Next phase focus: demo/readiness polish followed by GCP/Iceberg deployment planning.
