@@ -199,6 +199,12 @@ What this demo proves:
 - Canonical statistical output is written to `curated.rnd_statistics`.
 - Intermediate/ref/ops seam tables are materialised in the expected order.
 
+Raw/staging posture in this local synthetic v1 demo:
+- The demo materialises `raw.full_responses` so the operator-facing Dagster graph starts at a raw input seam.
+- The current `staged_responses` smoke asset still reads synthetic contributor and response-long CSV inputs via Dagster run config.
+- This is acceptable for local synthetic v1 coverage and should not be interpreted as the final production raw ingestion design.
+- Production raw ingestion design remains future deployment/integration work.
+
 Tables produced in the smoke path:
 - `raw.full_responses`
 - `ref.ultfoc_mapper`

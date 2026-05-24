@@ -6,14 +6,16 @@ This local demo shows the lean refoundation v1 pipeline running end-to-end with 
 
 ## Stage-by-stage flow in plain English
 
-1. `raw.full_responses`: minimal synthetic raw response records are loaded.
-2. `intermediate.staged_responses`: response rows are transmuted into staged full-response records.
+1. `raw.full_responses`: minimal synthetic raw response records are materialised as the raw input seam.
+2. `intermediate.staged_responses`: the current synthetic staging asset uses contributor and response-long CSV inputs to exercise the transmutation seam and appears downstream of raw in the Dagster graph.
 3. `intermediate.mapped_responses`: mapping seams add foreign ownership and cell-number context.
 4. `intermediate.imputed_responses`: minimal class-mean imputation fills configured target gaps.
 5. `intermediate.outlier_adjusted_responses`: manual outlier overrides are applied where supplied.
 6. `intermediate.estimated_responses`: minimal estimation weights are calculated.
 7. `intermediate.site_apportioned_responses`: estimated values are split to sites using explicit factors.
 8. `curated.rnd_statistics`: canonical statistical output is produced for downstream dissemination.
+
+Future production ingestion may replace these local CSV staging inputs with managed raw tables/resources.
 
 ## Visible checks
 

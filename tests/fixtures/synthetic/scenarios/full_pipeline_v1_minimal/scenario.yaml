@@ -2,4 +2,7 @@ id: full_pipeline_v1_minimal
 description: Full local synthetic v1 smoke scenario from raw/ref/ops through curated output.
 notes:
   - Tiny synthetic records only.
-  - Curated output is canonical table result.
+  - Self-contained fixture: all files needed by the full-chain smoke test live in this directory.
+  - `raw.full_responses` is materialised as the operator-facing graph seam.
+  - In this local synthetic v1 demo, staging uses local synthetic contributor/response-long CSV inputs.
+  - Final canonical output is `curated.rnd_statistics`.
