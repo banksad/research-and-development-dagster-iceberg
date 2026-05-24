@@ -31,7 +31,7 @@ def test_no_manual_rows_defaults_correctly() -> None:
 
 def test_existing_auto_outlier_true_respected_when_no_manual_row_exists() -> None:
     out = apply_manual_outlier_adjustments(_imputed_df(), pd.DataFrame())
-    row = out.loc[out["reference"] == "SYN003"].iloc[0]
+    row = out.loc[(out["reference"] == "SYN003") & (out["instance"] == 2)].iloc[0]
     assert bool(row["outlier"]) is True
     assert row["outlier_source"] == "auto"
 
@@ -49,12 +49,14 @@ def test_manual_true_overrides_base_default_false() -> None:
 
 def test_manual_false_overrides_existing_auto_outlier_true() -> None:
     manual = pd.DataFrame(
-        [{"survey_year": 2024, "survey_type": "RD", "reference": "SYN003", "instance": 1, "manual_outlier": False, "outlier_reason": "Reclassified"}]
+        [{"survey_year": 2024, "survey_type": "RD", "reference": "SYN003", "instance": 2, "manual_outlier": False, "outlier_reason": "Reclassified"}]
     )
     out = apply_manual_outlier_adjustments(_imputed_df(), manual)
-    row = out.loc[out["reference"] == "SYN003"].iloc[0]
+    row = out.loc[(out["reference"] == "SYN003") & (out["instance"] == 2)].iloc[0]
     assert bool(row["outlier"]) is False
     assert row["outlier_source"] == "manual_outlier"
+    assert bool(row["outlier_adjustment_applied"]) is True
+    assert row["outlier_reason"] == "Reclassified"
 
 
 def test_duplicate_manual_response_grain_fails_clearly() -> None:
