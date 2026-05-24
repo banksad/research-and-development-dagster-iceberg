@@ -31,11 +31,18 @@ def calculate_minimal_estimation_weights(
         raise ValueError(f"Missing required columns for minimal estimation weighting: {', '.join(missing)}")
 
     out = outlier_adjusted_responses.copy(deep=True)
+
+    def _to_numeric_or_operator_error(series: pd.Series, column_name: str) -> pd.Series:
+        try:
+            return pd.to_numeric(series, errors="raise")
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"Column {column_name} must be numeric for minimal estimation weighting.") from exc
+
     for col in [population_count_column, population_employment_column, employment_column]:
-        out[col] = pd.to_numeric(out[col], errors="raise")
+        out[col] = _to_numeric_or_operator_error(out[col], col)
     mask_target = out[target_column].notna()
     if mask_target.any():
-        out.loc[mask_target, target_column] = pd.to_numeric(out.loc[mask_target, target_column], errors="raise")
+        out.loc[mask_target, target_column] = _to_numeric_or_operator_error(out.loc[mask_target, target_column], target_column)
 
     out["a_weight"] = 1.0
     out["g_weight"] = 1.0

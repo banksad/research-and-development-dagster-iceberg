@@ -43,7 +43,7 @@ def test_row_count_grain_and_input_immutability_preserved() -> None:
     out = calculate_minimal_estimation_weights(df)
     pd.testing.assert_frame_equal(df, original)
     assert len(out) == len(df)
-    for col in ["reference", "instance", "survey", "period"]:
+    for col in ["reference", "instance", "survey_type", "survey_year"]:
         assert col in out.columns
 
 
