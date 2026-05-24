@@ -95,14 +95,15 @@ def check_group_sum_close_to(
     tolerance: float = 1e-9,
     label: str = "group sum",
 ) -> tuple[bool, str]:
-    cols = [*list(group_columns), value_column]
+    group_cols = list(group_columns)
+    cols = [*group_cols, value_column]
     missing = [c for c in cols if c not in df.columns]
     if missing:
         return False, f"Cannot validate {label}; missing columns: {', '.join(missing)}"
     values = pd.to_numeric(df[value_column], errors="coerce")
     if int(values.isna().sum()):
         return False, f"{value_column} contains null or non-numeric values."
-    grouped = values.groupby([df[c] for c in group_columns], dropna=False).sum()
+    grouped = values.groupby([df[c] for c in group_cols], dropna=False).sum()
     bad = int(((grouped - expected).abs() > tolerance).sum())
     if bad:
         return False, f"Found {bad} group(s) where {label} does not equal {expected}."
