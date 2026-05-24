@@ -188,3 +188,4 @@ The production-facing Dagster chain now declares explicit dependencies through t
 
 - Minimal curated output seam now implemented: `intermediate.site_apportioned_responses` -> `curated.rnd_statistics` as the canonical table-backed v1 output.
 - CSV/Excel/API dissemination layers remain future work and are intentionally not implemented in this seam.
+- Downstream dissemination products (CSV/Excel/API) must read from `curated.rnd_statistics` (or a controlled view over it) and must not replace the curated table as the system of record.
