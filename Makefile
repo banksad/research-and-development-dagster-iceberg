@@ -10,6 +10,7 @@
 	requirements-dev
 	test-randd-pipeline
 	dagster-refoundation-dev
+	dagster-refoundation-local-demo
 
 .DEFAULT_GOAL := help
 
@@ -97,3 +98,7 @@ test-randd-pipeline:
 ## Run Dagster dev server for the lean refoundation definitions module
 dagster-refoundation-dev:
 	python -m dagster dev -m src.randd_pipeline.definitions
+
+## Run Dagster dev server for local synthetic v1 demo definitions
+dagster-refoundation-local-demo:
+	python -m dagster dev -m src.randd_pipeline.local_demo_definitions
