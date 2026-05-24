@@ -25,6 +25,7 @@ try:
         site_apportionment_factors,
         site_apportioned_responses,
     )
+    from src.randd_pipeline.assets.outputs import curated_rnd_statistics
     from src.randd_pipeline.checks.raw_input_checks import (
         raw_full_responses_non_empty,
         raw_full_responses_required_columns,
@@ -89,6 +90,16 @@ try:
         site_apportionment_factors_site_identifier_populated,
         site_apportionment_factors_proportions_sum_to_one,
     )
+    from src.randd_pipeline.checks.curated_statistics_asset_checks import (
+        curated_rnd_statistics_table_exists,
+        curated_rnd_statistics_non_empty,
+        curated_rnd_statistics_required_columns,
+        curated_rnd_statistics_unique_grain,
+        curated_rnd_statistics_output_measure_populated,
+        curated_rnd_statistics_output_value_non_negative,
+        curated_rnd_statistics_provenance_columns_present,
+        curated_rnd_statistics_reconciles_to_site_input,
+    )
     from src.randd_pipeline.checks.staging_asset_checks import (
         staged_responses_non_empty,
         staged_responses_required_columns,
@@ -122,6 +133,7 @@ else:
         site_apportionment_factors,
         site_apportioned_responses,
         cell_number_mapper,
+        curated_rnd_statistics,
     ]
     _asset_checks = [
         raw_full_responses_table_exists,
@@ -177,6 +189,14 @@ else:
         cell_number_mapper_required_columns,
         cell_number_mapper_unique_cellnumber,
         cell_number_mapper_cellnumber_range,
+        curated_rnd_statistics_table_exists,
+        curated_rnd_statistics_non_empty,
+        curated_rnd_statistics_required_columns,
+        curated_rnd_statistics_unique_grain,
+        curated_rnd_statistics_output_measure_populated,
+        curated_rnd_statistics_output_value_non_negative,
+        curated_rnd_statistics_provenance_columns_present,
+        curated_rnd_statistics_reconciles_to_site_input,
     ]
     # NOTE: cell_number_mapped_responses remains available as a temporary
     # checkpoint/debug asset but is intentionally excluded from default

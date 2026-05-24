@@ -278,3 +278,8 @@ No snapshot-management implementation is introduced in this PR.
 - ADR explicitly states CSV/Excel exports are not canonical output targets.
 - No runtime code/tests/assets/checks/contracts changed.
 
+
+## Implementation update
+- Minimal `curated.rnd_statistics` seam has landed and materialises from `intermediate.site_apportioned_responses` using a pure pandas aggregation transform.
+- It provides a first canonical curated table output only; it does **not** implement legacy output runners, CSV/Excel exports, API serving, or publication workflow.
+- Follow-up areas: additional measures, richer output dimensions, release/snapshot tagging, optional CSV/Excel export, and API/serving layer.

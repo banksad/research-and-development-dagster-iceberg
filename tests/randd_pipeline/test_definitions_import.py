@@ -140,3 +140,22 @@ def test_asset_check_helper_read_table_for_check_importable():
     from src.randd_pipeline.checks.asset_check_helpers import read_table_for_check
 
     assert callable(read_table_for_check)
+
+def test_default_definitions_include_curated_rnd_statistics_asset_and_checks():
+    pytest.importorskip("dagster")
+    asset_key_paths = {tuple(asset_def.key.path): asset_def for asset_def in definitions.defs.assets}
+    check_names = {check_def.name for check_def in definitions.defs.asset_checks}
+    assert ("curated", "rnd_statistics") in asset_key_paths
+    for name in [
+        "curated_rnd_statistics_table_exists",
+        "curated_rnd_statistics_non_empty",
+        "curated_rnd_statistics_required_columns",
+        "curated_rnd_statistics_unique_grain",
+        "curated_rnd_statistics_output_measure_populated",
+        "curated_rnd_statistics_output_value_non_negative",
+        "curated_rnd_statistics_provenance_columns_present",
+        "curated_rnd_statistics_reconciles_to_site_input",
+    ]:
+        assert name in check_names
+    deps = {tuple(dep.path) for dep in asset_key_paths[("curated", "rnd_statistics")].dependency_keys}
+    assert ("intermediate", "site_apportioned_responses") in deps
