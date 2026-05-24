@@ -30,6 +30,40 @@ def test_imputed_asset_materialises_expected_fixture(tmp_path) -> None:
     assert "src.imputation" not in importlib.sys.modules
 
 
+
+
+def test_imputed_asset_materialises_expected_fixture_with_explicit_run_config(tmp_path) -> None:
+    mapped = load_scenario_csv("mapping_to_imputation_minimal", "mapped_responses.csv")
+    expected = load_scenario_csv("mapping_to_imputation_minimal", "expected_imputed_responses.csv")
+    resource = TableStoreResource(catalog_name="imputation-asset-explicit-config", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
+    store = resource.get_table_store()
+    store.create_table_from_dataframe(refs.INTERMEDIATE_MAPPED_RESPONSES, mapped, overwrite=False)
+
+    run_config = {
+        "ops": {
+            "imputed_responses": {
+                "config": {
+                    "target_column": "601",
+                    "imputation_class_column": "imp_class",
+                    "status_column": "status",
+                    "clear_statuses": ["clear", "responding"],
+                    "impute_statuses": ["impute", "non_response"],
+                    "output_column": "601_imputed",
+                    "marker_column": "imp_marker",
+                }
+            }
+        }
+    }
+
+    mod = importlib.import_module("src.randd_pipeline.assets.imputation")
+    asset_fn = getattr(mod, "imputed_responses")
+    defs = dagster.Definitions(assets=[asset_fn], resources={"table_store": resource})
+    result = defs.get_implicit_global_asset_job_def().execute_in_process(run_config=run_config)
+    assert result.success
+
+    actual = store.read_table_as_dataframe(refs.INTERMEDIATE_IMPUTED_RESPONSES)
+    assert_frame_equal_sorted(actual, expected, sort_by=["reference", "instance", "survey_type", "survey_year"])
+
 def test_simple_tmi_imputation_config_defaults() -> None:
     mod = importlib.import_module("src.randd_pipeline.assets.imputation")
     config = getattr(mod, "SimpleTmiImputationConfig")()
@@ -55,3 +89,22 @@ def test_simple_tmi_imputation_config_validation() -> None:
 
     with pytest.raises(ValueError, match="Status values must be unique"):
         config_cls(impute_statuses=["impute", "impute"])
+
+
+def test_simple_tmi_imputation_config_rejects_blank_status_values() -> None:
+    mod = importlib.import_module("src.randd_pipeline.assets.imputation")
+    config_cls = getattr(mod, "SimpleTmiImputationConfig")
+
+    with pytest.raises(ValueError, match="Status values must be non-blank strings"):
+        config_cls(clear_statuses=["clear", "   "])
+
+
+def test_simple_tmi_imputation_config_normalises_status_whitespace() -> None:
+    mod = importlib.import_module("src.randd_pipeline.assets.imputation")
+    config = getattr(mod, "SimpleTmiImputationConfig")(
+        clear_statuses=[" clear ", "responding"],
+        impute_statuses=[" impute ", "non_response"],
+    )
+
+    assert config.clear_statuses == ["clear", "responding"]
+    assert config.impute_statuses == ["impute", "non_response"]

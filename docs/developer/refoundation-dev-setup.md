@@ -145,3 +145,16 @@
 - This is not a full legacy imputation migration.
 - MoR, backdata, manual trimming, short-form expansion, and carry-forward behaviours remain out of scope in this slice.
 - `intermediate.imputed_responses` is now the next production-facing stage after `intermediate.mapped_responses` for the lean v1 chain.
+
+### Imputation Launchpad config note
+
+- `imputed_responses` now uses Dagster `Config` fields that are exposed directly in Launchpad/job run config.
+- Current fields are:
+  - `target_column`
+  - `imputation_class_column`
+  - `status_column`
+  - `clear_statuses`
+  - `impute_statuses`
+  - `output_column`
+  - `marker_column`
+- Default-equivalent explicit run config is supported when operators want to pin/configure values at launch time.
