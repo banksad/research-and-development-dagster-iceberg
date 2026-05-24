@@ -91,12 +91,48 @@ def test_simple_tmi_imputation_config_validation() -> None:
         config_cls(impute_statuses=["impute", "impute"])
 
 
+
+
+def test_simple_tmi_imputation_config_rejects_blank_output_column() -> None:
+    mod = importlib.import_module("src.randd_pipeline.assets.imputation")
+    config_cls = getattr(mod, "SimpleTmiImputationConfig")
+
+    with pytest.raises(ValueError, match="Column names must be non-blank strings"):
+        config_cls(output_column="   ")
+
+
+def test_simple_tmi_imputation_config_rejects_blank_marker_column() -> None:
+    mod = importlib.import_module("src.randd_pipeline.assets.imputation")
+    config_cls = getattr(mod, "SimpleTmiImputationConfig")
+
+    with pytest.raises(ValueError, match="Column names must be non-blank strings"):
+        config_cls(marker_column="   ")
+
+
+def test_simple_tmi_imputation_config_rejects_empty_impute_statuses() -> None:
+    mod = importlib.import_module("src.randd_pipeline.assets.imputation")
+    config_cls = getattr(mod, "SimpleTmiImputationConfig")
+
+    with pytest.raises(ValueError, match="Status lists must contain at least one value"):
+        config_cls(impute_statuses=[])
+
+
+def test_simple_tmi_imputation_config_rejects_duplicate_clear_statuses() -> None:
+    mod = importlib.import_module("src.randd_pipeline.assets.imputation")
+    config_cls = getattr(mod, "SimpleTmiImputationConfig")
+
+    with pytest.raises(ValueError, match="Status values must be unique"):
+        config_cls(clear_statuses=["clear", "clear"])
+
 def test_simple_tmi_imputation_config_rejects_blank_status_values() -> None:
     mod = importlib.import_module("src.randd_pipeline.assets.imputation")
     config_cls = getattr(mod, "SimpleTmiImputationConfig")
 
     with pytest.raises(ValueError, match="Status values must be non-blank strings"):
         config_cls(clear_statuses=["clear", "   "])
+
+    with pytest.raises(ValueError, match="Status values must be non-blank strings"):
+        config_cls(impute_statuses=["impute", "   "])
 
 
 def test_simple_tmi_imputation_config_normalises_status_whitespace() -> None:
