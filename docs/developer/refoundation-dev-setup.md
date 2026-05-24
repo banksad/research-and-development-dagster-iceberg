@@ -161,3 +161,11 @@
 
 - Minimal outlier seam now exists: explicit `ops.manual_outliers` decisions are applied to `intermediate.imputed_responses` and materialised as `intermediate.outlier_adjusted_responses`.
 - This seam does not implement full automatic outlier detection, clipping, estimation weights, or QA output tables (future work).
+
+## Manual outlier seam status note
+
+- `intermediate.outlier_adjusted_responses` is the current production-facing minimal outlier stage.
+- The stage consumes `ops.manual_outliers` when that operational table exists; otherwise it preserves default/auto behaviour from `intermediate.imputed_responses`.
+- The CSV-loading `manual_outliers` Dagster asset is currently a local/demo/helper ingestion path and is intentionally not required in default production definitions.
+- Automatic clipping/flagging and estimation remain out of scope in this seam.
+- Registered checks for this stage cover required columns, non-empty output, unique grain, outlier flag population, outlier source population, and manual-adjustment reason presence.

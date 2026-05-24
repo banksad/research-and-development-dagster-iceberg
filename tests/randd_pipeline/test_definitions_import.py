@@ -51,3 +51,29 @@ def test_default_definitions_register_imputed_responses_check_set():
     assert "imputed_responses_unique_grain" in check_names
     assert "imputed_responses_imputation_marker_populated" in check_names
     assert "imputed_responses_no_illegal_missing_imputed_values" in check_names
+
+
+def test_default_definitions_include_outlier_adjusted_responses_asset():
+    pytest.importorskip("dagster")
+    asset_key_paths = {tuple(asset_def.key.path) for asset_def in definitions.defs.assets}
+    assert ("intermediate", "outlier_adjusted_responses") in asset_key_paths
+
+
+def test_default_definitions_register_outlier_adjusted_responses_check_set():
+    pytest.importorskip("dagster")
+    check_names = {check_def.name for check_def in definitions.defs.asset_checks}
+
+    assert "outlier_adjusted_responses_table_exists" in check_names
+    assert "outlier_adjusted_responses_non_empty" in check_names
+    assert "outlier_adjusted_responses_required_columns" in check_names
+    assert "outlier_adjusted_responses_unique_grain" in check_names
+    assert "outlier_adjusted_responses_outlier_flag_populated" in check_names
+    assert "outlier_adjusted_responses_outlier_source_populated" in check_names
+    assert "outlier_adjusted_responses_manual_adjustment_reason_present" in check_names
+
+
+def test_default_definitions_exclude_manual_outliers_csv_loader_asset():
+    """Default defs assume ops.manual_outliers can be managed operationally outside CSV loading."""
+    pytest.importorskip("dagster")
+    asset_key_paths = {tuple(asset_def.key.path) for asset_def in definitions.defs.assets}
+    assert ("ops", "manual_outliers") not in asset_key_paths
