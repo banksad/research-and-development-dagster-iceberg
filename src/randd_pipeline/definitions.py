@@ -12,6 +12,7 @@ try:
     from dagster import Definitions
     from src.randd_pipeline.assets.inputs import raw_full_responses
     from src.randd_pipeline.assets.imputation import imputed_responses
+    from src.randd_pipeline.assets.outliers import outlier_adjusted_responses
     from src.randd_pipeline.assets.mapping import (
         cell_number_mapper,
         mapped_responses,
@@ -30,6 +31,15 @@ try:
         imputed_responses_required_columns,
         imputed_responses_table_exists,
         imputed_responses_unique_grain,
+    )
+    from src.randd_pipeline.checks.outlier_asset_checks import (
+        outlier_adjusted_responses_manual_adjustment_reason_present,
+        outlier_adjusted_responses_non_empty,
+        outlier_adjusted_responses_outlier_flag_populated,
+        outlier_adjusted_responses_outlier_source_populated,
+        outlier_adjusted_responses_required_columns,
+        outlier_adjusted_responses_table_exists,
+        outlier_adjusted_responses_unique_grain,
     )
     from src.randd_pipeline.checks.mapping_asset_checks import (
         mapped_responses_non_empty,
@@ -78,6 +88,7 @@ else:
         ultfoc_mapper,
         mapped_responses,
         imputed_responses,
+        outlier_adjusted_responses,
         cell_number_mapper,
     ]
     _asset_checks = [
@@ -104,6 +115,13 @@ else:
         imputed_responses_unique_grain,
         imputed_responses_imputation_marker_populated,
         imputed_responses_no_illegal_missing_imputed_values,
+        outlier_adjusted_responses_table_exists,
+        outlier_adjusted_responses_non_empty,
+        outlier_adjusted_responses_required_columns,
+        outlier_adjusted_responses_unique_grain,
+        outlier_adjusted_responses_outlier_flag_populated,
+        outlier_adjusted_responses_outlier_source_populated,
+        outlier_adjusted_responses_manual_adjustment_reason_present,
         cell_number_mapper_table_exists,
         cell_number_mapper_non_empty,
         cell_number_mapper_required_columns,

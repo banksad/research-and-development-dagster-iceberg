@@ -1,0 +1,5 @@
+survey_year,survey_type,reference,instance,imp_marker,601_imputed,auto_outlier,outlier,outlier_source,outlier_adjustment_applied,outlier_reason
+2024,RD,SYN001,1,not_imputed,10,,False,default_none,False,
+2024,RD,SYN002,1,TMI,20,,True,manual_outlier,True,methodologist override
+2024,RD,SYN003,2,not_imputed,30,True,False,manual_outlier,True,known one-off spike
+2024,RD,SYN004,1,not_imputed,40,True,True,auto,False,

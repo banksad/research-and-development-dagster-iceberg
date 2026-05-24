@@ -158,3 +158,6 @@
   - `output_column`
   - `marker_column`
 - Default-equivalent explicit run config is supported when operators want to pin/configure values at launch time.
+
+- Minimal outlier seam now exists: explicit `ops.manual_outliers` decisions are applied to `intermediate.imputed_responses` and materialised as `intermediate.outlier_adjusted_responses`.
+- This seam does not implement full automatic outlier detection, clipping, estimation weights, or QA output tables (future work).
