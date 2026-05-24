@@ -281,5 +281,7 @@ No snapshot-management implementation is introduced in this PR.
 
 ## Implementation update
 - Minimal `curated.rnd_statistics` seam has landed and materialises from `intermediate.site_apportioned_responses` using a pure pandas aggregation transform.
+- Hardening coverage now confirms aggregation behaviour, provenance-column presence, long-format measure shape, and reconciliation checks against `intermediate.site_apportioned_responses`.
+- Future API/export layers must treat curated table snapshots as source of truth and remain downstream of the curated seam.
 - It provides a first canonical curated table output only; it does **not** implement legacy output runners, CSV/Excel exports, API serving, or publication workflow.
 - Follow-up areas: additional measures, richer output dimensions, release/snapshot tagging, optional CSV/Excel export, and API/serving layer.
