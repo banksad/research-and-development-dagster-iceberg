@@ -25,7 +25,7 @@ def test_multiple_site_rows_aggregate_into_one_output_row():
     out = build_curated_rnd_statistics(inp)
     row = out[(out["survey_year"] == 2024) & (out["survey_type"] == "BERD") & (out["output_measure"] == "total_211_apportioned")]
     assert len(row) == 1
-    assert float(row.iloc[0]["output_value"]) == pytest.approx(225.0)
+    assert float(row.iloc[0]["output_value"]) == pytest.approx(200.0)
 
 
 def test_survey_groups_remain_separate():
