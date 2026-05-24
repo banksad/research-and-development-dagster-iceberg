@@ -48,6 +48,9 @@ def check_apportioned_values_non_negative(df: pd.DataFrame, column: str = "211_a
 def check_site_factors_proportions_sum_to_one(df: pd.DataFrame, tolerance: float = 1e-9):
     m=[c for c in [*_RESPONSE_GRAIN,'site_proportion'] if c not in df.columns]
     if m: return False, f"Cannot validate factor proportion sums; missing columns: {', '.join(m)}"
-    s=df.groupby(_RESPONSE_GRAIN, dropna=False)['site_proportion'].sum()
+    vals = pd.to_numeric(df['site_proportion'], errors='coerce')
+    if int(vals.isna().sum()):
+        return False, 'site_proportion contains null or non-numeric values.'
+    s = vals.groupby([df[c] for c in _RESPONSE_GRAIN], dropna=False).sum()
     bad=int(((s-1.0).abs()>tolerance).sum())
     return (False, f"Found {bad} response grain(s) where site proportions do not sum to 1.0.") if bad else (True, f"Site proportions sum to 1.0 across {int(s.shape[0])} response grain(s).")
