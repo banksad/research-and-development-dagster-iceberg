@@ -194,49 +194,42 @@ The production-facing Dagster chain now declares explicit dependencies through t
 
 Use the synthetic full-chain smoke scenario to prove that the lean refoundation assets run end-to-end locally from `raw.full_responses` through `curated.rnd_statistics`.
 
-What this demo proves:
-- Production-facing v1 transformation seams run coherently as one chain in local development.
-- Canonical statistical output is written to `curated.rnd_statistics`.
-- Intermediate/ref/ops seam tables are materialised in the expected order.
+### Local synthetic v1 quickstart
 
-Raw/staging posture in this local synthetic v1 demo:
-- The demo materialises `raw.full_responses` so the operator-facing Dagster graph starts at a raw input seam.
-- The current `staged_responses` smoke asset still reads synthetic contributor and response-long CSV inputs via Dagster run config.
-- This is acceptable for local synthetic v1 coverage and should not be interpreted as the final production raw ingestion design.
-- Production raw ingestion design remains future deployment/integration work.
+1. Install dependencies:
 
-Tables produced in the smoke path:
-- `raw.full_responses`
-- `ref.ultfoc_mapper`
-- `ref.cell_number_mapper`
-- `ops.manual_outliers`
-- `ref.site_apportionment_factors`
-- `intermediate.staged_responses`
-- `intermediate.mapped_responses`
-- `intermediate.imputed_responses`
-- `intermediate.outlier_adjusted_responses`
-- `intermediate.estimated_responses`
-- `intermediate.site_apportioned_responses`
-- `curated.rnd_statistics`
+   ```bash
+   make requirements-dev
+   ```
 
-Out of scope for this demo:
-- No CSV output.
-- No Excel output.
-- No API output.
+2. Run the self-contained smoke test:
 
-Run the smoke test:
+   ```bash
+   pytest -q tests/randd_pipeline/test_full_synthetic_v1_chain.py
+   ```
 
-```bash
-pytest -q tests/randd_pipeline/test_full_synthetic_v1_chain.py
-```
+3. Start the local Dagster UI demo:
 
-Optional Dagster graph inspection (if your local environment has Dagster UI dependencies installed):
+   ```bash
+   make dagster-refoundation-local-demo
+   ```
 
-```bash
-python -m dagster dev -f src/randd_pipeline/definitions.py
-```
+4. Open the local Dagster URL shown in the terminal (usually http://127.0.0.1:3000).
+5. In Launchpad, paste or load run config from:
 
-Notes:
-- The smoke scenario uses tiny synthetic fixtures only.
-- The test seeds synthetic input tables/files locally and does not use production paths or GCP config.
-- If `pandas` or `dagster` is unavailable, pytest will skip the smoke test via `pytest.importorskip`.
+   `config/dagster/full_synthetic_v1_run_config.yaml`
+
+6. Materialise the full chain.
+7. Inspect in the UI:
+   - asset graph;
+   - materialisation events;
+   - checks;
+   - `curated/rnd_statistics`.
+
+### Notes and guardrails
+
+- This demo is local synthetic v1 only; it is not production deployment.
+- `curated.rnd_statistics` is the canonical output table in scope for this demo.
+- CSV/Excel/API dissemination remains downstream and out of scope.
+- Use a fresh warehouse path (via `RND_PIPELINE_LOCAL_WAREHOUSE`) or clear `.tmp/refoundation-ui-warehouse` between repeated full runs, because table writes are deliberately non-mutating by default.
+- The test and demo use tiny synthetic fixtures only; no production paths, secrets, or GCP config are required.

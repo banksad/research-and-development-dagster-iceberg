@@ -20,6 +20,9 @@ Future production ingestion may replace these local CSV staging inputs with mana
 ## Visible checks
 
 The smoke path validates checks across major seams, including:
+- raw full responses checks,
+- ULTFOC mapper checks,
+- cell-number mapper checks,
 - staged responses checks,
 - mapped responses checks,
 - imputed responses checks,
@@ -56,3 +59,18 @@ By stabilising curated outputs as canonical tables, future dissemination layers 
 - Not performance tested.
 - Not full parity with all legacy outputs.
 - No CSV/Excel/API dissemination in this demo.
+
+
+## How to inspect this in Dagster UI
+
+1. Start the local demo server:
+
+   ```bash
+   make dagster-refoundation-local-demo
+   ```
+
+2. Open Dagster in your browser and launch a run using `config/dagster/full_synthetic_v1_run_config.yaml`.
+3. Materialise the full synthetic chain from `raw/full_responses` to `curated/rnd_statistics`.
+4. Review asset checks in the run and asset detail pages.
+5. If you intentionally break a fixture, inspect failed checks to confirm check visibility and failure diagnostics.
+6. Confirm the final output asset is `curated/rnd_statistics` (`curated.rnd_statistics`).
