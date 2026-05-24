@@ -41,7 +41,10 @@ else:
                 raise ValueError("clear_statuses must be non-empty and contain no blank values.")
             return value
 
-    @asset(key=AssetKey(["intermediate", "estimated_responses"]))
+    @asset(
+        key=AssetKey(["intermediate", "estimated_responses"]),
+        deps=[AssetKey(["intermediate", "outlier_adjusted_responses"])],
+    )
     def estimated_responses(table_store: TableStoreResource, config: MinimalEstimationWeightsConfig) -> dict[str, Any]:
         store = table_store.get_table_store()
         outlier_adjusted = store.read_table_as_dataframe(refs.INTERMEDIATE_OUTLIER_ADJUSTED_RESPONSES)

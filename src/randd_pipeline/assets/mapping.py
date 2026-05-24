@@ -118,7 +118,14 @@ else:
             "column_count": int(len(mapper.columns)),
         }
 
-    @asset(key=AssetKey(["intermediate", "mapped_responses"]))
+    @asset(
+        key=AssetKey(["intermediate", "mapped_responses"]),
+        deps=[
+            AssetKey(["intermediate", "staged_responses"]),
+            AssetKey(["ref", "ultfoc_mapper"]),
+            AssetKey(["ref", "cell_number_mapper"]),
+        ],
+    )
     def mapped_responses(table_store: TableStoreResource) -> dict[str, Any]:
         """Materialise canonical mapped responses for the current v1 mapping scope."""
 

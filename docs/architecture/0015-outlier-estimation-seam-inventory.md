@@ -387,6 +387,7 @@ Use both:
 ## Implementation note (minimal seam landed)
 
 The first minimal estimation-weights seam has landed. It calculates `a_weight` and `g_weight` at response grain from outlier-adjusted inputs and materialises `intermediate.estimated_responses`.
+Test hardening now covers core failure modes (missing columns, invalid numerics, null/non-positive/non-finite weights, and duplicate grain checks), and production-facing Dagster dependencies are explicit through `estimated_responses` for operator-visible stage order.
 
 Current non-goals in this seam:
 - full legacy weight parity;
