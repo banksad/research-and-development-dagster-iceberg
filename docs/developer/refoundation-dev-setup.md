@@ -29,6 +29,8 @@
 ## Orchestration direction
 
 - `src/randd_pipeline.definitions` is the target Dagster module for the lean refoundation architecture.
+- Production-facing default definitions may intentionally exclude local/demo CSV helper assets (for example the `manual_outliers` CSV loader).
+- `src.randd_pipeline.local_demo_definitions` intentionally includes the local/demo `manual_outliers` helper asset so `config/dagster/full_synthetic_v1_run_config.yaml` can materialise `ops.manual_outliers` from synthetic fixture CSV.
 - `src/orchestration/dagster/definitions.py` is legacy wrapper scaffolding and should not be extended for new implementation work.
 
 ## Local Iceberg development/testing notes

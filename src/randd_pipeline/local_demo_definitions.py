@@ -11,6 +11,7 @@ import os
 
 from dagster import Definitions
 
+from src.randd_pipeline.assets.outliers import manual_outliers
 from src.randd_pipeline.definitions import _asset_checks, _assets
 from src.randd_pipeline.resources import TableStoreResource
 
@@ -22,8 +23,10 @@ def _local_demo_warehouse() -> str:
     return os.getenv(_LOCAL_WAREHOUSE_ENV, _DEFAULT_LOCAL_WAREHOUSE)
 
 
+_local_demo_assets = list(dict.fromkeys([*_assets, manual_outliers]))
+
 defs = Definitions(
-    assets=_assets,
+    assets=_local_demo_assets,
     asset_checks=_asset_checks,
     resources={
         "table_store": TableStoreResource(
