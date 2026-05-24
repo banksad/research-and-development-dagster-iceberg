@@ -3,67 +3,186 @@
 - **Status:** Proposed
 - **Date:** 2026-05-24
 
-## 1. Context
+## 1. Purpose
 
-The refoundation now has first-class Dagster assets, asset checks, resources, and an operator-facing Dagster `Config` class for minimal imputation settings.
+This ADR sets a design guardrail for the refoundation: use Dagster-native concepts before creating custom framework code.
 
-Before adding further business logic, we need an explicit decision record for which Dagster-native capabilities should be used directly, and where custom framework code is intentionally out of scope.
+- Dagster is the production control plane for the lean refoundation.
+- Production operators are expected to use Dagster UI and Launchpad for routine operation.
+- Dagster assets, checks, config, resources, metadata, run history, and eventually partitions/schedules are product features, not incidental implementation details.
+- This ADR is guidance only; it does not implement new runtime features in this change.
 
-## 2. Decision
+## 2. Current Dagster usage in this repository
 
-For the lean Dagster/Iceberg target architecture, default to Dagster-native features first, only adding custom abstractions where there is a clear analytical/business requirement not met by Dagster.
+Current refoundation usage already includes:
 
-### 2.1 Dagster-native features to use by default
+- Dagster assets for raw, staged, mapped, and imputed tables.
+- Dagster asset checks for table existence, required columns, grain uniqueness, mapper coverage, imputation markers, and illegal missing values.
+- `TableStoreResource` as the table persistence and table-access boundary.
+- `SimpleTmiImputationConfig` as the first operator-facing Dagster `Config` class.
+- `src/randd_pipeline/definitions.py` as the lean refoundation Dagster entry point.
 
-- **Assets** for stage contracts and lineage (e.g., `raw/*`, `intermediate/*`, `outputs/*`).
-- **Asset checks** for data-quality and contract validation instead of bespoke check runners.
-- **Resources** for runtime integration boundaries (e.g., table-store access and related adapters).
-- **Dagster Config classes** for operator-facing run-time parameters exposed in Launchpad/job run config.
-- **Dagster run metadata and event log** for run observability rather than custom run-log files.
-- **Dagster selection/backfills/re-execution** for controlled partial reruns.
+## 3. Dagster Config / Pythonic config
 
-### 2.2 Explicit non-goals
+For operator-facing run parameters:
 
-- Building a bespoke orchestration mini-framework on top of Dagster.
-- Recreating file-era run-mode/path-plumbing behaviour in new runtime code.
-- Embedding statistical/business logic in orchestration wrappers when it belongs in pure domain functions.
+- Use Dagster `Config` classes.
+- Prefer typed fields with field descriptions.
+- Prefer validation that fails before run execution where possible.
+- Keep Launchpad field names and descriptions understandable for non-programmer production operators.
 
-## 3. Current state vs target state
+Examples of parameters that should be operator-facing when needed:
 
-### Current state
+- survey year / period;
+- run purpose;
+- imputation parameters;
+- future outlier/estimation parameters where appropriate.
 
-- Minimal mapping and imputation seams are implemented with Dagster assets and checks.
-- First operator-facing imputation `Config` exists for simple TMI-style behaviour.
-- Legacy pipeline remains available as parity oracle for migration evidence.
+Avoid:
 
-### Target state
+- unvalidated loose YAML for operator-facing parameters;
+- hidden constants inside assets where operators need controlled overrides.
 
-- All new refoundation stages are expressed as Dagster assets with explicit table contracts.
-- Quality gates are enforced through asset checks and check metadata/QA tables.
-- Operator controls are passed through Dagster Config and Launchpad/job run config, not custom YAML/path glue.
+## 4. Resources / `ConfigurableResource`
 
-## 4. Migration principles reinforced
+For runtime integration boundaries:
 
-- Keep core analytical logic in `src/randd_pipeline/domain/*` as pure pandas/domain transforms.
-- Keep orchestration in Dagster assets/resources/checks without introducing new framework layers.
-- Preserve explicit parity/equivalence evidence when orchestration or persistence changes.
-- Keep changes scoped and reversible.
+- Use Dagster resources for external systems and integration points.
+- Keep table/lakehouse access behind `TableStoreResource` (or a future production equivalent).
+- Configure future GCP/lakehouse/Iceberg service access via resources.
+- Assets should not directly instantiate PyIceberg, GCP, or HTTP clients unless there is explicit justification.
+- Do not place secrets in code or committed configuration.
 
-## 5. Consequences
+## 5. Asset checks
 
-### Positive
+For contracts and quality gates:
 
-- Reduces risk of accidental custom-framework growth.
-- Improves operability by aligning config and run controls with Dagster UI/Launchpad.
-- Keeps migration intent consistent with lean target architecture ADRs.
+- Use asset checks for table contracts and data-quality gates.
+- Keep checks visible and understandable in Dagster UI.
+- Ensure checks state what failed and why it matters.
 
-### Trade-offs
+Current and near-term examples include:
 
-- Some legacy convenience behaviours (file-era path/run-mode toggles) are intentionally not carried forward.
-- Additional up-front contract/config documentation is required when introducing new seams.
+- required columns;
+- non-empty outputs;
+- unique response grain;
+- mapper coverage;
+- imputation marker completeness;
+- illegal missing imputed values;
+- future reconciliation checks.
 
-## 6. Rollout intent
+## 6. Blocking checks and warning/review checks (future policy)
 
-- Apply this ADR as a design guardrail for upcoming imputation and downstream seam PRs.
-- Require each relevant PR to state whether it uses Dagster-native primitives or introduces any custom abstraction (and why).
-- Keep the legacy route as oracle-only until seam-level parity evidence is complete.
+Design direction for production-like operation:
+
+- Blocking checks should prevent unsafe downstream materialisation.
+- Likely blocking failures include schema/key/reference failures and illegal missing values.
+- Warning/review checks should surface unusual but still possible conditions.
+- Exact blocking-vs-warning policy should be decided before production-like v1.
+
+Illustrative split:
+
+- **Blocking:** missing required columns, duplicate response grain, invalid reference mapper keys.
+- **Warning/review:** unusual imputation rate, large movement from prior run, high correction volume.
+
+## 7. Asset metadata and tags
+
+Use Dagster metadata and tags to improve debugging and operator confidence.
+
+- Prefer Dagster metadata/run history over recreating legacy runlog behaviour.
+- Attach operationally useful context directly to materialisations/checks where practical.
+
+Useful metadata/tag examples:
+
+- table identifier;
+- row count;
+- column count;
+- survey year / period;
+- imputation count;
+- no-mean-found count;
+- warning count;
+- future Iceberg snapshot IDs;
+- future correction input snapshot IDs;
+- future release/publication tag.
+
+## 8. Partitions and backfills (future decision)
+
+Likely future choices:
+
+- probable partition dimensions include survey year and survey type;
+- partitions may support rerun/backfill for a specific year/type without custom run-mode flags;
+- partition strategy should be decided before the full end-to-end synthetic v1 becomes too large.
+
+This ADR does not implement partitions in this PR.
+
+## 9. Schedules and sensors (future)
+
+Likely future operation model:
+
+- schedules may support regular production windows;
+- sensors may react to upstream/lakehouse availability;
+- do not build a custom scheduler when Dagster-native scheduling/sensors fit.
+
+This ADR does not implement schedules or sensors in this PR.
+
+## 10. I/O managers (deferred)
+
+Current position:
+
+- explicit `TableStoreResource` boundaries are acceptable while access patterns stabilise;
+- an Iceberg-backed I/O manager could reduce boilerplate later;
+- do not introduce an I/O manager prematurely;
+- revisit after more stages share the same read-transform-write table pattern.
+
+## 11. Check factories / reusable check helpers (future)
+
+Current repeated check patterns include `table_exists`, `non_empty`, `required_columns`, and `unique_grain`.
+
+Guidance:
+
+- consider check factories/helper builders once patterns stabilise across more stages;
+- avoid over-abstraction while pipeline shape is still evolving.
+
+## 12. Features not to invent ourselves unless needed
+
+Prefer Dagster-native capabilities before custom frameworks. Explicitly avoid inventing custom equivalents for:
+
+- custom run logs;
+- custom scheduler;
+- custom QA dashboard;
+- custom operator config parser;
+- custom stage orchestration;
+- hidden file-path registries;
+- custom lineage layer where Dagster + Iceberg metadata provides equivalent evidence.
+
+## 13. Other FOSS tools
+
+Balanced position:
+
+- other FOSS tools may be useful later for validation, data diffing, metadata cataloguing, observability, documentation, or table-quality checks;
+- near-term implementation should stay Dagster-native because Dagster already covers core production-operation needs;
+- do not add another framework unless there is a specific gap, clear owner, small proof of value, and no simpler Dagster-native route.
+
+This section names categories only and does not add dependencies.
+
+## 14. Near-term implementation implications
+
+For upcoming refoundation work:
+
+- use Dagster `Config` for future operator-facing stage configuration;
+- continue using `TableStoreResource` for table access boundaries;
+- add meaningful metadata to future asset/check outputs;
+- decide blocking-vs-warning check policy before production-like v1;
+- consider partition strategy before the full end-to-end synthetic run is large;
+- defer I/O manager introduction and extra FOSS tooling until current patterns stabilise.
+
+## 15. Anti-goals
+
+This ADR does **not**:
+
+- implement partitions;
+- implement schedules/sensors;
+- introduce an I/O manager;
+- add new dependencies;
+- deploy to GCP;
+- expand imputation/statistical logic.
