@@ -376,3 +376,10 @@ Use both:
 - Scope: full-grain joins (`reference+instance+survey_type+survey_year`) with explicit `ops.manual_outliers` overrides and provenance columns (`outlier_source`, `outlier_adjustment_applied`, `outlier_reason`).
 - Non-scope: automatic outlier detection/clipping, estimation, weighting, and downstream QA outputs.
 - Follow-up areas: governed operational workflow for manual inputs, richer QA checks/metrics, and integration with later estimation seams.
+
+## Implementation update: first manual-outlier seam landed
+
+- The first manual-outlier adjustment seam is now implemented in the lean package: `intermediate.imputed_responses + ops.manual_outliers -> intermediate.outlier_adjusted_responses`.
+- Hardened tests confirm bad operational inputs are caught (duplicate manual grain rows, unmatched strict references, missing required columns, invalid manual values, and missing manual reasons when adjustments are applied).
+- Default-definition status is explicit: `outlier_adjusted_responses` and its checks are registered in default `definitions.defs`, while the CSV-loading helper asset for `ops.manual_outliers` remains non-default/local until the operational correction-entry process is designed.
+- Follow-up remains focused on automatic outlier inventory/implementation and/or estimation inventory, not legacy runner migration.
