@@ -1,0 +1,3 @@
+survey_year,survey_type,reference,instance,manual_outlier,outlier_reason
+2024,RD,SYN002,1,True,methodologist override
+2024,RD,SYN003,2,False,known one-off spike

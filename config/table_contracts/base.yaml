@@ -173,6 +173,21 @@ contracts:
       - "Replaces legacy hidden construction mutation with explicit auditable input records."
       - "Postcode amendments are governed operational inputs, not hidden runtime mutation."
 
+
+  - identifier: ops.manual_outliers
+    namespace: ops
+    table: manual_outliers
+    description: Explicit operational manual outlier decisions applied at response grain.
+    layer: ops
+    owner: randd-operations
+    expected_grain: reference + instance + survey_type + survey_year
+    primary_key: null
+    partition_by: [survey_year, survey_type]
+    required_columns: [survey_year, survey_type, reference, instance, manual_outlier, outlier_reason]
+    notes:
+      - "Explicit operational input for record-level manual outlier decisions."
+      - "Synthetic/local v1 input only; production governance fields may be expanded later."
+
   - identifier: intermediate.staged_responses
     namespace: intermediate
     table: staged_responses
@@ -258,9 +273,12 @@ contracts:
     expected_grain: reference + instance + survey_year + survey_type
     primary_key: null
     partition_by: [survey_year, survey_type]
-    required_columns: [survey_year, survey_type, reference, instance]
+    required_columns: [survey_year, survey_type, reference, instance, outlier, outlier_source, outlier_adjustment_applied, outlier_reason]
     notes:
-      - "TODO: Define outlier adjustment provenance columns."
+      - "Minimal v1 manual-outlier-adjustment seam only."
+      - "No automatic clipping or estimation yet."
+      - "outlier is the final decision for this minimal scope."
+      - "outlier_source captures manual_outlier/auto/default_none provenance."
 
   - identifier: intermediate.estimated_responses
     namespace: intermediate

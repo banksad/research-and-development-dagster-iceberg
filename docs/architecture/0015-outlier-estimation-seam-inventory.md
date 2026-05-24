@@ -370,3 +370,9 @@ Use both:
 - [x] No tests changed.
 - [x] No assets/checks/contracts changed.
 - [x] Intended PR mode: draft against `develop`.
+
+## Implementation update (manual seam v1)
+- First manual-outlier adjustment seam is implemented for `imputed_responses -> outlier_adjusted_responses`.
+- Scope: full-grain joins (`reference+instance+survey_type+survey_year`) with explicit `ops.manual_outliers` overrides and provenance columns (`outlier_source`, `outlier_adjustment_applied`, `outlier_reason`).
+- Non-scope: automatic outlier detection/clipping, estimation, weighting, and downstream QA outputs.
+- Follow-up areas: governed operational workflow for manual inputs, richer QA checks/metrics, and integration with later estimation seams.
