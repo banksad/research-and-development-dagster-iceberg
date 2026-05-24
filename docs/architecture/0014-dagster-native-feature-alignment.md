@@ -143,6 +143,13 @@ Guidance:
 - consider check factories/helper builders once patterns stabilise across more stages;
 - avoid over-abstraction while pipeline shape is still evolving.
 
+Implementation note (current state):
+
+- repeated dataframe-level checks are now backed by small internal helper functions in `src/randd_pipeline/checks/common.py`;
+- helper scope is intentionally lightweight and explicit rather than a large abstraction layer;
+- no external data-validation framework has been introduced;
+- Dagster asset checks remain the operator-facing quality mechanism.
+
 ## 12. Features not to invent ourselves unless needed
 
 Prefer Dagster-native capabilities before custom frameworks. Explicitly avoid inventing custom equivalents for:
