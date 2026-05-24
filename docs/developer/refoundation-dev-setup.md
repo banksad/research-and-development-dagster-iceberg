@@ -189,3 +189,48 @@ The production-facing Dagster chain now declares explicit dependencies through t
 - Minimal curated output seam now implemented: `intermediate.site_apportioned_responses` -> `curated.rnd_statistics` as the canonical table-backed v1 output.
 - CSV/Excel/API dissemination layers remain future work and are intentionally not implemented in this seam.
 - Downstream dissemination products (CSV/Excel/API) must read from `curated.rnd_statistics` (or a controlled view over it) and must not replace the curated table as the system of record.
+
+## Run the local synthetic v1 pipeline
+
+Use the synthetic full-chain smoke scenario to prove that the lean refoundation assets run end-to-end locally from `raw.full_responses` through `curated.rnd_statistics`.
+
+What this demo proves:
+- Production-facing v1 transformation seams run coherently as one chain in local development.
+- Canonical statistical output is written to `curated.rnd_statistics`.
+- Intermediate/ref/ops seam tables are materialised in the expected order.
+
+Tables produced in the smoke path:
+- `raw.full_responses`
+- `ref.ultfoc_mapper`
+- `ref.cell_number_mapper`
+- `ops.manual_outliers`
+- `ref.site_apportionment_factors`
+- `intermediate.staged_responses`
+- `intermediate.mapped_responses`
+- `intermediate.imputed_responses`
+- `intermediate.outlier_adjusted_responses`
+- `intermediate.estimated_responses`
+- `intermediate.site_apportioned_responses`
+- `curated.rnd_statistics`
+
+Out of scope for this demo:
+- No CSV output.
+- No Excel output.
+- No API output.
+
+Run the smoke test:
+
+```bash
+pytest -q tests/randd_pipeline/test_full_synthetic_v1_chain.py
+```
+
+Optional Dagster graph inspection (if your local environment has Dagster UI dependencies installed):
+
+```bash
+python -m dagster dev -f src/randd_pipeline/definitions.py
+```
+
+Notes:
+- The smoke scenario uses tiny synthetic fixtures only.
+- The test seeds synthetic input tables/files locally and does not use production paths or GCP config.
+- If `pandas` or `dagster` is unavailable, pytest will skip the smoke test via `pytest.importorskip`.
