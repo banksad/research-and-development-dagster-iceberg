@@ -169,3 +169,7 @@
 - The CSV-loading `manual_outliers` Dagster asset is currently a local/demo/helper ingestion path and is intentionally not required in default production definitions.
 - Automatic clipping/flagging and estimation remain out of scope in this seam.
 - Registered checks for this stage cover required columns, non-empty output, unique grain, outlier flag population, outlier source population, and manual-adjustment reason presence.
+
+## Minimal estimation seam status
+
+A first minimal estimation seam now exists. It calculates `a_weight` and `g_weight`, consumes `intermediate.outlier_adjusted_responses`, and materialises `intermediate.estimated_responses`. This is not full legacy estimation, does not yet apply weights to all output variables, and site apportionment/final outputs remain future work.

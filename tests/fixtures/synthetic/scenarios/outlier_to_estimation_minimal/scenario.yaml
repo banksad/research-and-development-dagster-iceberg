@@ -1,0 +1,8 @@
+id: outlier_to_estimation_minimal
+description: Minimal synthetic seam from outlier-adjusted responses to estimated responses.
+notes:
+  - Cell 100 eligible rows are SYN001/SYN002/SYN003 with N=5, n=3, o=1 so a_weight=(5-1)/(3-1)=2.0.
+  - For cell 100 E=90, e=60, s=30 so g_weight=(90-30)/(2*(60-30))=1.0.
+  - Outlier rule resets SYN003 weights to 1.0.
+  - SYN005 is non-selected (selectiontype C) so both weights remain 1.0.
+  - Cell 200 has N=1, n=1, o=0 so a_weight=(1-0)/(1-0)=1.0 and g_weight=1.0.

@@ -383,3 +383,13 @@ Use both:
 - Hardened tests confirm bad operational inputs are caught (duplicate manual grain rows, unmatched strict references, missing required columns, invalid manual values, and missing manual reasons when adjustments are applied).
 - Default-definition status is explicit: `outlier_adjusted_responses` and its checks are registered in default `definitions.defs`, while the CSV-loading helper asset for `ops.manual_outliers` remains non-default/local until the operational correction-entry process is designed.
 - Follow-up remains focused on automatic outlier inventory/implementation and/or estimation inventory, not legacy runner migration.
+
+## Implementation note (minimal seam landed)
+
+The first minimal estimation-weights seam has landed. It calculates `a_weight` and `g_weight` at response grain from outlier-adjusted inputs and materialises `intermediate.estimated_responses`.
+
+Current non-goals in this seam:
+- full legacy weight parity;
+- applying weights to selected estimation variables;
+- QA/diagnostic estimation tables;
+- site apportionment.

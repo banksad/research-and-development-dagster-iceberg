@@ -13,6 +13,7 @@ try:
     from src.randd_pipeline.assets.inputs import raw_full_responses
     from src.randd_pipeline.assets.imputation import imputed_responses
     from src.randd_pipeline.assets.outliers import outlier_adjusted_responses
+    from src.randd_pipeline.assets.estimation import estimated_responses
     from src.randd_pipeline.assets.mapping import (
         cell_number_mapper,
         mapped_responses,
@@ -40,6 +41,14 @@ try:
         outlier_adjusted_responses_required_columns,
         outlier_adjusted_responses_table_exists,
         outlier_adjusted_responses_unique_grain,
+    )
+    from src.randd_pipeline.checks.estimation_asset_checks import (
+        estimated_responses_non_empty,
+        estimated_responses_required_columns,
+        estimated_responses_table_exists,
+        estimated_responses_unique_grain,
+        estimated_responses_weights_populated,
+        estimated_responses_weights_positive,
     )
     from src.randd_pipeline.checks.mapping_asset_checks import (
         mapped_responses_non_empty,
@@ -89,6 +98,7 @@ else:
         mapped_responses,
         imputed_responses,
         outlier_adjusted_responses,
+        estimated_responses,
         cell_number_mapper,
     ]
     _asset_checks = [
@@ -122,6 +132,12 @@ else:
         outlier_adjusted_responses_outlier_flag_populated,
         outlier_adjusted_responses_outlier_source_populated,
         outlier_adjusted_responses_manual_adjustment_reason_present,
+        estimated_responses_table_exists,
+        estimated_responses_non_empty,
+        estimated_responses_required_columns,
+        estimated_responses_unique_grain,
+        estimated_responses_weights_populated,
+        estimated_responses_weights_positive,
         cell_number_mapper_table_exists,
         cell_number_mapper_non_empty,
         cell_number_mapper_required_columns,

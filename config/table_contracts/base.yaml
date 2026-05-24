@@ -289,9 +289,13 @@ contracts:
     expected_grain: reference + instance + survey_year + survey_type
     primary_key: null
     partition_by: [survey_year, survey_type]
-    required_columns: [survey_year, survey_type, reference, instance]
+    required_columns: [survey_year, survey_type, reference, instance, a_weight, g_weight]
     notes:
-      - "TODO: Confirm estimator output key fields and QA metrics."
+      - "Minimal v1 estimation weight seam only."
+      - "Calculates a_weight and g_weight from outlier-adjusted responses only."
+      - "Does not yet apply weights to all estimation variables."
+      - "Does not produce final publication outputs."
+      - "Site apportionment remains future work."
 
   - identifier: intermediate.site_apportioned_responses
     namespace: intermediate
