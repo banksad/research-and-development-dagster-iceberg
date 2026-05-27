@@ -37,36 +37,45 @@ def _assert_full_v1_fixture_coherence(fixture_dir):
     contributors_df = pd.read_csv(fixture_dir / "input_staging_contributors.csv")
     responses_long_df = pd.read_csv(fixture_dir / "input_staging_responses_long.csv")
     manual_outliers_df = pd.read_csv(fixture_dir / "input_ops_manual_outliers.csv")
+    site_factors_df = pd.read_csv(fixture_dir / "input_ref_site_apportionment_factors.csv")
 
     contributor_grain = ["period", "survey", "reference", "instance"]
-    response_grain = ["period", "survey", "reference", "instance"]
     manual_grain = ["survey_year", "survey_type", "reference", "instance"]
 
-    required_contributor_cols = {"reference", "instance", "survey", "period", "imp_class", "status", "employment", "selectiontype"}
+    required_contributor_cols = {"reference", "instance", "survey", "period", "imp_class", "status", "employment", "selectiontype", "formtype"}
     required_response_cols = {"reference", "instance", "survey", "period", "questioncode", "response"}
-    missing_contributor_cols = required_contributor_cols - set(contributors_df.columns)
-    missing_response_cols = required_response_cols - set(responses_long_df.columns)
-    assert not missing_contributor_cols, f"contributors fixture missing required columns: {sorted(missing_contributor_cols)}"
-    assert not missing_response_cols, f"responses fixture missing required columns: {sorted(missing_response_cols)}"
+    required_site_factor_cols = {"survey_year", "survey_type", "reference", "instance", "site_id", "site_proportion"}
+    assert not (required_contributor_cols - set(contributors_df.columns)), "contributors fixture missing required columns"
+    assert not (required_response_cols - set(responses_long_df.columns)), "responses fixture missing required columns"
+    assert not (required_site_factor_cols - set(site_factors_df.columns)), "site factors fixture missing required columns"
 
-    contributor_grain_df = contributors_df[contributor_grain].drop_duplicates()
-    response_grain_df = responses_long_df[response_grain].drop_duplicates()
-    staged_grain = contributor_grain_df.merge(response_grain_df, on=response_grain, how="inner")
+    response_wide = responses_long_df.pivot_table(index=contributor_grain, columns="questioncode", values="response", aggfunc="first").reset_index()
+    response_wide.columns = [str(c) for c in response_wide.columns]
+    staged_like = contributors_df.merge(response_wide, on=contributor_grain, how="left")
+
+    for col in ["601", "709", "211"]:
+        assert col in staged_like.columns and staged_like[col].notna().all(), f"fixture missing response item required downstream: {col}"
+
+    for col in ["imp_class", "status"]:
+        assert staged_like[col].notna().all(), f"fixture missing required imputation/estimation attribute values: {col}"
+
+    for col in ["employment", "selectiontype", "formtype"]:
+        assert staged_like[col].notna().all(), f"fixture missing required estimation attribute values: {col}"
+
+    cell_map_df = pd.read_csv(fixture_dir / "input_ref_cell_number_mapper.csv")
+    required_cell_cols = {"cell_no", "UNI_Count", "uni_employment"}
+    assert not (required_cell_cols - set(cell_map_df.columns)), "cell mapper fixture missing required columns"
+    assert staged_like["cellno"].notna().all(), "fixture missing cellno response values required for cellnumber mapping"
+
     manual_normalized = manual_outliers_df.rename(columns={"survey_year": "period", "survey_type": "survey"})
-
     assert not manual_outliers_df.duplicated(manual_grain).any(), "manual outlier fixture has duplicate grain rows"
+    unmatched_manual = manual_normalized[contributor_grain].merge(staged_like[contributor_grain], on=contributor_grain, how="left", indicator=True)
+    assert unmatched_manual[unmatched_manual["_merge"] == "left_only"].empty, "manual outlier fixture grain rows missing from staged/imputed response grain"
 
-    unmatched = manual_normalized[contributor_grain].merge(
-        staged_grain,
-        on=contributor_grain,
-        how="left",
-        indicator=True,
-    )
-    unmatched = unmatched[unmatched["_merge"] == "left_only"]
-    assert unmatched.empty, (
-        "manual outlier fixture grain rows missing from staged/imputed grain: "
-        f"{unmatched[contributor_grain].to_dict(orient='records')}"
-    )
+    site_normalized = site_factors_df.rename(columns={"survey_year": "period", "survey_type": "survey"})
+    missing_site = staged_like[contributor_grain].merge(site_normalized[contributor_grain].drop_duplicates(), on=contributor_grain, how="left", indicator=True)
+    assert missing_site[missing_site["_merge"] == "left_only"].empty, "site apportionment factors missing for staged/imputed/estimated response grain"
+    assert (site_factors_df["site_proportion"] > 0).all(), "site_proportion must be positive"
 
 
 
@@ -133,11 +142,28 @@ def test_full_synthetic_v1_chain_materialises_once_and_checks_pass(tmp_path):
     for required_col in ["imp_class", "status", "601_imputed", "imp_marker"]:
         assert required_col in imputed_df.columns
 
+    for table in [
+        refs.INTERMEDIATE_IMPUTED_RESPONSES,
+        refs.INTERMEDIATE_OUTLIER_ADJUSTED_RESPONSES,
+        refs.INTERMEDIATE_ESTIMATED_RESPONSES,
+        refs.INTERMEDIATE_SITE_APPORTIONED_RESPONSES,
+        refs.CURATED_RND_STATISTICS,
+    ]:
+        df = store.read_table_as_dataframe(table)
+        assert len(df) > 0
+
     estimated_df = store.read_table_as_dataframe(refs.INTERMEDIATE_ESTIMATED_RESPONSES)
     for required_col in ["a_weight", "g_weight"]:
         assert required_col in estimated_df.columns
     assert (estimated_df["a_weight"] > 0).all()
     assert (estimated_df["g_weight"] > 0).all()
+
+    site_df = store.read_table_as_dataframe(refs.INTERMEDIATE_SITE_APPORTIONED_RESPONSES)
+    assert "211_apportioned" in site_df.columns
+
+    curated_df = store.read_table_as_dataframe(refs.CURATED_RND_STATISTICS)
+    assert "output_measure" in curated_df.columns
+    assert curated_df["output_measure"].eq("total_211_apportioned").any()
 
     for fn in [
         raw_checks_mod.raw_full_responses_table_exists,
