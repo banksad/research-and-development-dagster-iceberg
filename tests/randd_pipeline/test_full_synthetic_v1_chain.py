@@ -33,8 +33,46 @@ raw_checks_mod = importlib.import_module("src.randd_pipeline.checks.raw_input_ch
 ref_checks_mod = importlib.import_module("src.randd_pipeline.checks.ref_asset_checks")
 
 
+def _assert_full_v1_fixture_coherence(fixture_dir):
+    contributors_df = pd.read_csv(fixture_dir / "input_staging_contributors.csv")
+    responses_long_df = pd.read_csv(fixture_dir / "input_staging_responses_long.csv")
+    manual_outliers_df = pd.read_csv(fixture_dir / "input_ops_manual_outliers.csv")
+
+    contributor_grain = ["period", "survey", "reference", "instance"]
+    response_grain = ["period", "survey", "reference", "instance"]
+    manual_grain = ["survey_year", "survey_type", "reference", "instance"]
+
+    required_contributor_cols = {"reference", "instance", "survey", "period", "imp_class", "status", "employment", "selectiontype"}
+    required_response_cols = {"reference", "instance", "survey", "period", "questioncode", "response"}
+    missing_contributor_cols = required_contributor_cols - set(contributors_df.columns)
+    missing_response_cols = required_response_cols - set(responses_long_df.columns)
+    assert not missing_contributor_cols, f"contributors fixture missing required columns: {sorted(missing_contributor_cols)}"
+    assert not missing_response_cols, f"responses fixture missing required columns: {sorted(missing_response_cols)}"
+
+    contributor_grain_df = contributors_df[contributor_grain].drop_duplicates()
+    response_grain_df = responses_long_df[response_grain].drop_duplicates()
+    staged_grain = contributor_grain_df.merge(response_grain_df, on=response_grain, how="inner")
+    manual_normalized = manual_outliers_df.rename(columns={"survey_year": "period", "survey_type": "survey"})
+
+    assert not manual_outliers_df.duplicated(manual_grain).any(), "manual outlier fixture has duplicate grain rows"
+
+    unmatched = manual_normalized[contributor_grain].merge(
+        staged_grain,
+        on=contributor_grain,
+        how="left",
+        indicator=True,
+    )
+    unmatched = unmatched[unmatched["_merge"] == "left_only"]
+    assert unmatched.empty, (
+        "manual outlier fixture grain rows missing from staged/imputed grain: "
+        f"{unmatched[contributor_grain].to_dict(orient='records')}"
+    )
+
+
+
 def test_full_synthetic_v1_chain_materialises_once_and_checks_pass(tmp_path):
     fixture_dir = scenario_path(SCENARIO_ID)
+    _assert_full_v1_fixture_coherence(fixture_dir)
 
     resource = TableStoreResource(catalog_name="full-chain", catalog_type="local_sql", warehouse=str(tmp_path / "warehouse"))
     defs = dagster.Definitions(
