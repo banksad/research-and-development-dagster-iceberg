@@ -38,7 +38,7 @@ def test_explicit_run_config_materialises_and_carries_provenance(tmp_path):
     inp["999"] = [1.0, 2.0, 3.0]
     store.create_table_from_dataframe(refs.INTERMEDIATE_SITE_APPORTIONED_RESPONSES, inp, overwrite=False)
     defs = dagster.Definitions(assets=[mod.curated_rnd_statistics], resources={"table_store": resource})
-    run_config = {"ops": {"curated_rnd_statistics": {"config": {"measure_columns": {"211_apportioned": "total_211_apportioned", "999": "total_999"}, "source_snapshot_id": "snap-1", "pipeline_run_id": "run-1"}}}}
+    run_config = {"ops": {"curated__rnd_statistics": {"config": {"measure_columns": {"211_apportioned": "total_211_apportioned", "999": "total_999"}, "source_snapshot_id": "snap-1", "pipeline_run_id": "run-1"}}}}
     assert defs.get_implicit_global_asset_job_def().execute_in_process(run_config=run_config).success
     out = store.read_table_as_dataframe(refs.CURATED_RND_STATISTICS)
     assert set(out["source_snapshot_id"]) == {"snap-1"}
