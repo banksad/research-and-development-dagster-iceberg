@@ -1,20 +1,20 @@
 ops:
-  raw_full_responses:
+  raw__full_responses:
     config:
       csv_path: tests/fixtures/synthetic/scenarios/full_pipeline_v1_minimal/input_raw_full_responses.csv
-  staged_responses:
+  intermediate__staged_responses:
     config:
       contributors_csv_path: tests/fixtures/synthetic/scenarios/full_pipeline_v1_minimal/input_staging_contributors.csv
       responses_long_csv_path: tests/fixtures/synthetic/scenarios/full_pipeline_v1_minimal/input_staging_responses_long.csv
-  ultfoc_mapper:
+  ref__ultfoc_mapper:
     config:
       ultfoc_mapper_csv_path: tests/fixtures/synthetic/scenarios/full_pipeline_v1_minimal/input_ref_ultfoc_mapper.csv
-  cell_number_mapper:
+  ref__cell_number_mapper:
     config:
       cell_number_mapper_csv_path: tests/fixtures/synthetic/scenarios/full_pipeline_v1_minimal/input_ref_cell_number_mapper.csv
-  manual_outliers:
+  ops__manual_outliers:
     config:
       manual_outliers_csv_path: tests/fixtures/synthetic/scenarios/full_pipeline_v1_minimal/input_ops_manual_outliers.csv
-  site_apportionment_factors:
+  ref__site_apportionment_factors:
     config:
       site_factors_csv_path: tests/fixtures/synthetic/scenarios/full_pipeline_v1_minimal/input_ref_site_apportionment_factors.csv

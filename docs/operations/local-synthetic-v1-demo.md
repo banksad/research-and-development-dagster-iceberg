@@ -62,6 +62,20 @@ By stabilising curated outputs as canonical tables, future dissemination layers 
 - No CSV/Excel/API dissemination in this demo.
 
 
+
+### Dagster implicit asset job op names for Launchpad config
+
+When running the implicit global asset job in Dagster Launchpad, use the namespaced op keys from the asset key path:
+
+- `raw__full_responses`
+- `intermediate__staged_responses`
+- `ref__ultfoc_mapper`
+- `ref__cell_number_mapper`
+- `ops__manual_outliers`
+- `ref__site_apportionment_factors`
+
+Do not use legacy function-style op keys (for example `raw_full_responses` or `staged_responses`) in Launchpad run config for this full-chain synthetic v1 job.
+
 ## How to inspect this in Dagster UI
 
 1. Start the local demo server:

@@ -192,6 +192,20 @@ The production-facing Dagster chain now declares explicit dependencies through t
 - CSV/Excel/API dissemination layers remain future work and are intentionally not implemented in this seam.
 - Downstream dissemination products (CSV/Excel/API) must read from `curated.rnd_statistics` (or a controlled view over it) and must not replace the curated table as the system of record.
 
+
+### Dagster implicit asset job op names for Launchpad config
+
+When running the implicit global asset job in Dagster Launchpad, use the namespaced op keys from the asset key path:
+
+- `raw__full_responses`
+- `intermediate__staged_responses`
+- `ref__ultfoc_mapper`
+- `ref__cell_number_mapper`
+- `ops__manual_outliers`
+- `ref__site_apportionment_factors`
+
+Do not use legacy function-style op keys (for example `raw_full_responses` or `staged_responses`) in Launchpad run config for this full-chain synthetic v1 job.
+
 ## Run the local synthetic v1 pipeline
 
 Use the synthetic full-chain smoke scenario to prove that the lean refoundation assets run end-to-end locally from `raw.full_responses` through `curated.rnd_statistics`.
