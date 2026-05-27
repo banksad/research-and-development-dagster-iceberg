@@ -21,29 +21,25 @@ def materialise_outlier_adjusted_responses(store, df, overwrite: bool = False) -
 
 try:
     from dagster import AssetKey, Config, asset
-    from pydantic import Field, field_validator
+    from pydantic import Field
 except ModuleNotFoundError:  # pragma: no cover
     pass
 else:
-
-    class ManualOutliersInputConfig(Config):
-        manual_outliers_csv_path: str = Field(description="Path to a synthetic/manual outlier input CSV for local v1 testing.")
-
-        @field_validator("manual_outliers_csv_path")
-        @classmethod
-        def _validate_non_blank_path(cls, value: str) -> str:
-            if not value.strip():
-                raise ValueError("manual_outliers_csv_path must be non-blank.")
-            return value
 
     class ManualOutlierAdjustmentConfig(Config):
         strict_manual_references: bool = Field(default=True, description="Fail the run when manual outlier rows do not match imputed input records.")
         default_outlier: bool = Field(default=False, description="Default outlier decision when no auto or manual outlier value is present.")
 
-    @asset(key=AssetKey(["ops", "manual_outliers"]))
-    def manual_outliers(table_store: TableStoreResource, config: ManualOutliersInputConfig) -> dict[str, Any]:
+    @asset(
+        key=AssetKey(["ops", "manual_outliers"]),
+        config_schema={"manual_outliers_csv_path": str},
+    )
+    def manual_outliers(context, table_store: TableStoreResource) -> dict[str, Any]:
+        path = context.op_config.get("manual_outliers_csv_path")
+        if not path or not str(path).strip():
+            raise ValueError("manual_outliers asset requires non-blank config key 'manual_outliers_csv_path'")
         store = table_store.get_table_store()
-        manual = pd.read_csv(config.manual_outliers_csv_path)
+        manual = pd.read_csv(str(path))
         materialise_manual_outliers(store, manual, overwrite=False)
         return {"table": refs.OPS_MANUAL_OUTLIERS, "row_count": int(len(manual)), "column_count": int(len(manual.columns))}
 

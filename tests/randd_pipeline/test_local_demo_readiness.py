@@ -23,6 +23,14 @@ def test_local_demo_definitions_register_table_store_resource(monkeypatch):
     assert table_store_resource.warehouse == ".tmp/custom-warehouse"
 
 
+def test_local_demo_definitions_build_implicit_global_asset_job_def():
+    pytest.importorskip("dagster")
+
+    from src.randd_pipeline.local_demo_definitions import defs
+
+    assert defs.get_implicit_global_asset_job_def() is not None
+
+
 def test_local_demo_definitions_include_expected_full_synthetic_v1_assets():
     dagster = pytest.importorskip("dagster")
 
