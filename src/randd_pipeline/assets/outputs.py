@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, Dict, Optional
 
 from src.randd_pipeline.domain.outputs import build_curated_rnd_statistics
 from src.randd_pipeline.io import refs
@@ -13,16 +11,16 @@ except ModuleNotFoundError:  # pragma: no cover
     pass
 else:
     class CuratedRndStatisticsConfig(Config):
-        measure_columns: dict[str, str] = Field(
-            default={"211_apportioned": "total_211_apportioned"},
+        measure_columns: Dict[str, str] = Field(
+            default_factory=lambda: {"211_apportioned": "total_211_apportioned"},
             description="Mapping from site-apportioned numeric input columns to curated output measure names.",
         )
-        source_snapshot_id: str | None = Field(default=None, description="Optional source Iceberg snapshot identifier for provenance. Placeholder in local v1.")
-        pipeline_run_id: str | None = Field(default=None, description="Optional pipeline run identifier for provenance. Placeholder in local v1.")
+        source_snapshot_id: Optional[str] = Field(default=None, description="Optional source Iceberg snapshot identifier for provenance. Placeholder in local v1.")
+        pipeline_run_id: Optional[str] = Field(default=None, description="Optional pipeline run identifier for provenance. Placeholder in local v1.")
 
         @field_validator("measure_columns")
         @classmethod
-        def _measure_columns_valid(cls, v: dict[str, str]) -> dict[str, str]:
+        def _measure_columns_valid(cls, v: Dict[str, str]) -> Dict[str, str]:
             if not v:
                 raise ValueError("measure_columns must be non-empty.")
             for source_col, measure_name in v.items():

@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, List
 
 import pandas as pd
 from src.randd_pipeline.domain.site_apportionment import apply_explicit_site_apportionment
@@ -14,14 +12,14 @@ except ModuleNotFoundError:  # pragma: no cover
     pass
 else:
     class SiteApportionmentConfig(Config):
-        value_columns: list[str] = Field(default=["211"], description="Numeric estimated-response columns to apportion across sites.")
+        value_columns: List[str] = Field(default_factory=lambda: ["211"], description="Numeric estimated-response columns to apportion across sites.")
         output_suffix: str = Field(default="_apportioned", description="Suffix added to each apportioned output value column.")
         strict_factor_coverage: bool = Field(default=True, description="Fail the run when estimated responses do not have site factors.")
         factor_sum_tolerance: float = Field(default=1e-9, description="Tolerance for checking that site proportions sum to one per response.")
 
         @field_validator("value_columns")
         @classmethod
-        def _value_cols_valid(cls, v: list[str]) -> list[str]:
+        def _value_cols_valid(cls, v: List[str]) -> List[str]:
             if not v or any(not c.strip() for c in v):
                 raise ValueError("value_columns must be non-empty with no blank names.")
             return v

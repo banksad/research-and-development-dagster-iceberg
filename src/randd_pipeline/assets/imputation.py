@@ -1,8 +1,6 @@
 """Minimal imputation seam asset for mapped -> imputed responses."""
 
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, List
 
 from src.randd_pipeline.domain.imputation import apply_simple_tmi_imputation
 from src.randd_pipeline.io import refs
@@ -46,14 +44,14 @@ else:
                 "imputation."
             ),
         )
-        clear_statuses: list[str] = Field(
+        clear_statuses: List[str] = Field(
             default_factory=lambda: ["clear", "responding"],
             description=(
                 "Status values treated as valid observed records for calculating "
                 "class means."
             ),
         )
-        impute_statuses: list[str] = Field(
+        impute_statuses: List[str] = Field(
             default_factory=lambda: ["impute", "non_response"],
             description="Status values treated as requiring imputation.",
         )
@@ -84,7 +82,7 @@ else:
 
         @_field_validator("clear_statuses", "impute_statuses")
         @classmethod
-        def _validate_status_list(cls, value: list[str]) -> list[str]:
+        def _validate_status_list(cls, value: List[str]) -> List[str]:
             if not value:
                 raise ValueError("Status lists must contain at least one value.")
             cleaned = [item.strip() for item in value]
