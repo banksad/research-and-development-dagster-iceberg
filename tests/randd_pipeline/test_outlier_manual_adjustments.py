@@ -59,6 +59,20 @@ def test_manual_false_overrides_existing_auto_outlier_true() -> None:
     assert row["outlier_reason"] == "Reclassified"
 
 
+def test_manual_reason_assignment_keeps_unique_outlier_reason_column() -> None:
+    manual = pd.DataFrame(
+        [{"survey_year": 2024, "survey_type": "RD", "reference": "SYN003", "instance": 2, "manual_outlier": False, "outlier_reason": "Reclassified"}]
+    )
+
+    actual = apply_manual_outlier_adjustments(_imputed_df(), manual)
+
+    assert actual.columns.is_unique
+    assert "outlier_reason" in actual.columns
+    assert list(actual.columns).count("outlier_reason") == 1
+    row = actual.loc[(actual["reference"] == "SYN003") & (actual["instance"] == 2)].iloc[0]
+    assert row["outlier_reason"] == "Reclassified"
+
+
 def test_duplicate_manual_response_grain_fails_clearly() -> None:
     manual = pd.concat([_manual_df(), _manual_df().iloc[[0]]], ignore_index=True)
     with pytest.raises(ValueError, match="duplicate response grain"):
