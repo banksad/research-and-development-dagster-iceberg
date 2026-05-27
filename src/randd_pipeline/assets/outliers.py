@@ -20,15 +20,10 @@ def materialise_outlier_adjusted_responses(store, df, overwrite: bool = False) -
 
 
 try:
-    from dagster import AssetKey, Config, asset
-    from pydantic import Field
+    from dagster import AssetKey, Field, asset
 except ModuleNotFoundError:  # pragma: no cover
     pass
 else:
-
-    class ManualOutlierAdjustmentConfig(Config):
-        strict_manual_references: bool = Field(default=True, description="Fail the run when manual outlier rows do not match imputed input records.")
-        default_outlier: bool = Field(default=False, description="Default outlier decision when no auto or manual outlier value is present.")
 
     @asset(
         key=AssetKey(["ops", "manual_outliers"]),
@@ -46,16 +41,30 @@ else:
     @asset(
         key=AssetKey(["intermediate", "outlier_adjusted_responses"]),
         deps=[AssetKey(["intermediate", "imputed_responses"])],
+        config_schema={
+            "strict_manual_references": Field(
+                bool,
+                default_value=True,
+                description="Fail the run when manual outlier rows do not match imputed input records.",
+            ),
+            "default_outlier": Field(
+                bool,
+                default_value=False,
+                description="Default outlier decision when no auto or manual outlier value is present.",
+            ),
+        },
     )
-    def outlier_adjusted_responses(table_store: TableStoreResource, config: ManualOutlierAdjustmentConfig) -> dict[str, Any]:
+    def outlier_adjusted_responses(context, table_store: TableStoreResource) -> dict[str, Any]:
         store = table_store.get_table_store()
+        strict_manual_references = context.op_config["strict_manual_references"]
+        default_outlier = context.op_config["default_outlier"]
         imputed = store.read_table_as_dataframe(refs.INTERMEDIATE_IMPUTED_RESPONSES)
         manual = store.read_table_as_dataframe(refs.OPS_MANUAL_OUTLIERS) if store.table_exists(refs.OPS_MANUAL_OUTLIERS) else None
         out = apply_manual_outlier_adjustments(
             imputed,
             manual_outliers=manual,
-            strict_manual_references=config.strict_manual_references,
-            default_outlier=config.default_outlier,
+            strict_manual_references=strict_manual_references,
+            default_outlier=default_outlier,
         )
         materialise_outlier_adjusted_responses(store, out, overwrite=False)
         return {
