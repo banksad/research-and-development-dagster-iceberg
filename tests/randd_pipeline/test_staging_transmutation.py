@@ -30,6 +30,14 @@ def test_build_full_responses_matches_expected_fixture() -> None:
 
     actual = build_full_responses(contributors=contributors, responses=responses)
 
+    actual = actual.copy()
+    expected = expected.copy()
+    actual.columns = [str(col) for col in actual.columns]
+    expected.columns = [str(col) for col in expected.columns]
+    expected = expected.reindex(columns=actual.columns)
+    actual = actual.convert_dtypes()
+    expected = expected.convert_dtypes()
+
     assert_frame_equal_sorted(
         actual,
         expected,

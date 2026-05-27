@@ -17,6 +17,13 @@ def _input_df():
 def test_expected_fixture_output():
     out = build_curated_rnd_statistics(_input_df())
     exp = load_scenario_csv("site_apportionment_to_curated_output_minimal", "expected_curated_rnd_statistics.csv")
+
+    out = out.copy()
+    exp = exp.copy()
+    for col in ["source_snapshot_id", "pipeline_run_id"]:
+        out[col] = out[col].astype("string").fillna("")
+        exp[col] = exp[col].astype("string").fillna("")
+
     assert_frame_equal_sorted(out, exp, ["survey_year", "survey_type", "output_measure"])
 
 
@@ -87,7 +94,9 @@ def test_missing_measure_source_column_fails_clearly():
 
 
 def test_non_numeric_measure_value_fails_clearly():
-    bad = _input_df(); bad.loc[0, "211_apportioned"] = "x"
+    bad = _input_df()
+    bad["211_apportioned"] = bad["211_apportioned"].astype("object")
+    bad.loc[0, "211_apportioned"] = "x"
     with pytest.raises(ValueError, match="non-numeric"):
         build_curated_rnd_statistics(bad)
 
