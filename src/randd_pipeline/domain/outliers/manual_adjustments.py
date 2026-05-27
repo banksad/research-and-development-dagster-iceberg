@@ -66,8 +66,10 @@ def apply_manual_outlier_adjustments(
     merged.loc[has_manual, "outlier"] = merged.loc[has_manual, "manual_outlier"].astype(bool)
     merged.loc[has_manual, "outlier_source"] = "manual_outlier"
     merged.loc[has_manual, "outlier_adjustment_applied"] = True
-    merged.loc[has_manual, "outlier_reason"] = merged.loc[has_manual, "outlier_reason_y"]
+    merged.loc[has_manual, "outlier_reason_x"] = merged.loc[has_manual, "outlier_reason_y"]
 
     result = merged.drop(columns=["manual_outlier", "outlier_reason_y"])
     result = result.rename(columns={"outlier_reason_x": "outlier_reason"})
+    if not result.columns.is_unique:
+        raise ValueError("manual outlier adjustment produced duplicate columns")
     return result
