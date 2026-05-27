@@ -13,16 +13,6 @@ try:
 except ModuleNotFoundError:  # pragma: no cover
     pass
 else:
-    class SiteApportionmentFactorsInputConfig(Config):
-        site_factors_csv_path: str = Field(description="Path to a synthetic site apportionment factors CSV for local v1 testing.")
-
-        @field_validator("site_factors_csv_path")
-        @classmethod
-        def _path_non_blank(cls, v: str) -> str:
-            if not v.strip():
-                raise ValueError("site_factors_csv_path must be non-blank.")
-            return v
-
     class SiteApportionmentConfig(Config):
         value_columns: list[str] = Field(default=["211"], description="Numeric estimated-response columns to apportion across sites.")
         output_suffix: str = Field(default="_apportioned", description="Suffix added to each apportioned output value column.")
@@ -60,10 +50,16 @@ try:
 except NameError:  # pragma: no cover
     pass
 else:
-    @asset(key=AssetKey(["ref", "site_apportionment_factors"]))
-    def site_apportionment_factors(table_store: TableStoreResource, config: SiteApportionmentFactorsInputConfig) -> dict[str, Any]:
+    @asset(
+        key=AssetKey(["ref", "site_apportionment_factors"]),
+        config_schema={"site_factors_csv_path": str},
+    )
+    def site_apportionment_factors(context, table_store: TableStoreResource) -> dict[str, Any]:
+        path = context.op_config.get("site_factors_csv_path")
+        if not path or not str(path).strip():
+            raise ValueError("site_apportionment_factors asset requires non-blank config key 'site_factors_csv_path'")
         store = table_store.get_table_store()
-        df = pd.read_csv(config.site_factors_csv_path)
+        df = pd.read_csv(str(path))
         materialise_site_apportionment_factors(store, df, overwrite=False)
         return {"table": refs.REF_SITE_APPORTIONMENT_FACTORS, "row_count": int(len(df)), "column_count": int(len(df.columns))}
 
