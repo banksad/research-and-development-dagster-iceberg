@@ -95,6 +95,12 @@ def test_full_synthetic_v1_chain_materialises_once_and_checks_pass(tmp_path):
     for required_col in ["imp_class", "status", "601_imputed", "imp_marker"]:
         assert required_col in imputed_df.columns
 
+    estimated_df = store.read_table_as_dataframe(refs.INTERMEDIATE_ESTIMATED_RESPONSES)
+    for required_col in ["a_weight", "g_weight"]:
+        assert required_col in estimated_df.columns
+    assert (estimated_df["a_weight"] > 0).all()
+    assert (estimated_df["g_weight"] > 0).all()
+
     for fn in [
         raw_checks_mod.raw_full_responses_table_exists,
         raw_checks_mod.raw_full_responses_non_empty,
