@@ -15,7 +15,12 @@ def materialise_imputed_responses(store, df, overwrite: bool = False) -> None:
 
 try:
     from dagster import AssetKey, Config, asset
-    from pydantic import Field, field_validator
+    from pydantic import Field
+
+    try:
+        from pydantic import field_validator as _field_validator
+    except ImportError:  # pragma: no cover
+        from pydantic import validator as _field_validator
 except ModuleNotFoundError:  # pragma: no cover
     pass
 else:
@@ -42,14 +47,14 @@ else:
             ),
         )
         clear_statuses: list[str] = Field(
-            default=["clear", "responding"],
+            default_factory=lambda: ["clear", "responding"],
             description=(
                 "Status values treated as valid observed records for calculating "
                 "class means."
             ),
         )
         impute_statuses: list[str] = Field(
-            default=["impute", "non_response"],
+            default_factory=lambda: ["impute", "non_response"],
             description="Status values treated as requiring imputation.",
         )
         output_column: str = Field(
@@ -64,7 +69,7 @@ else:
             ),
         )
 
-        @field_validator(
+        @_field_validator(
             "target_column",
             "imputation_class_column",
             "status_column",
@@ -77,7 +82,7 @@ else:
                 raise ValueError("Column names must be non-blank strings.")
             return value
 
-        @field_validator("clear_statuses", "impute_statuses")
+        @_field_validator("clear_statuses", "impute_statuses")
         @classmethod
         def _validate_status_list(cls, value: list[str]) -> list[str]:
             if not value:
