@@ -1,4 +1,4 @@
-reference,instance,survey,period,formtype,legalstatus,referencepostcode,createdby,createddate,lastupdatedby,imp_class,status
-SYN001,1,BERD,2025,Q,1,ZZ11ZZ,sys,2026-01-01,sys,A,clear
-SYN002,1,BERD,2025,R,2,ZZ22ZZ,sys,2026-01-01,sys,A,impute
-SYN003,1,BERD,2025,Q,1,ZZ33ZZ,sys,2026-01-01,sys,B,clear
+reference,instance,survey,period,formtype,legalstatus,referencepostcode,createdby,createddate,lastupdatedby,imp_class,status,employment,selectiontype
+SYN001,0,BERD,2025,0006,1,ZZ11ZZ,sys,2026-01-01,sys,A,Clear,10,P
+SYN002,0,BERD,2025,0006,2,ZZ22ZZ,sys,2026-01-01,sys,A,Clear - overridden,20,P
+SYN003,0,BERD,2025,0006,1,ZZ33ZZ,sys,2026-01-01,sys,B,Clear,30,P
