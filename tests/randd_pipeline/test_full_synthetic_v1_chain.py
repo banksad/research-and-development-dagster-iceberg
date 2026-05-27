@@ -91,6 +91,10 @@ def test_full_synthetic_v1_chain_materialises_once_and_checks_pass(tmp_path):
     ]:
         assert store.table_exists(table)
 
+    imputed_df = store.read_table_as_dataframe(refs.INTERMEDIATE_IMPUTED_RESPONSES)
+    for required_col in ["imp_class", "status", "601_imputed", "imp_marker"]:
+        assert required_col in imputed_df.columns
+
     for fn in [
         raw_checks_mod.raw_full_responses_table_exists,
         raw_checks_mod.raw_full_responses_non_empty,
