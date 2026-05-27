@@ -57,17 +57,17 @@ def test_full_synthetic_v1_chain_materialises_once_and_checks_pass(tmp_path):
 
     run_config = {
         "ops": {
-            "raw_full_responses": {"config": {"csv_path": str(fixture_dir / "input_raw_full_responses.csv")}},
-            "staged_responses": {
+            "raw__full_responses": {"config": {"csv_path": str(fixture_dir / "input_raw_full_responses.csv")}},
+            "intermediate__staged_responses": {
                 "config": {
                     "contributors_csv_path": str(fixture_dir / "input_staging_contributors.csv"),
                     "responses_long_csv_path": str(fixture_dir / "input_staging_responses_long.csv"),
                 }
             },
-            "ultfoc_mapper": {"config": {"ultfoc_mapper_csv_path": str(fixture_dir / "input_ref_ultfoc_mapper.csv")}},
-            "cell_number_mapper": {"config": {"cell_number_mapper_csv_path": str(fixture_dir / "input_ref_cell_number_mapper.csv")}},
-            "manual_outliers": {"config": {"manual_outliers_csv_path": str(fixture_dir / "input_ops_manual_outliers.csv")}},
-            "site_apportionment_factors": {"config": {"site_factors_csv_path": str(fixture_dir / "input_ref_site_apportionment_factors.csv")}},
+            "ref__ultfoc_mapper": {"config": {"ultfoc_mapper_csv_path": str(fixture_dir / "input_ref_ultfoc_mapper.csv")}},
+            "ref__cell_number_mapper": {"config": {"cell_number_mapper_csv_path": str(fixture_dir / "input_ref_cell_number_mapper.csv")}},
+            "ops__manual_outliers": {"config": {"manual_outliers_csv_path": str(fixture_dir / "input_ops_manual_outliers.csv")}},
+            "ref__site_apportionment_factors": {"config": {"site_factors_csv_path": str(fixture_dir / "input_ref_site_apportionment_factors.csv")}},
         }
     }
 

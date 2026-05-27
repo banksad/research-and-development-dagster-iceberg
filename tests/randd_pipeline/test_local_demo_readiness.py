@@ -68,12 +68,12 @@ def test_full_synthetic_v1_run_config_is_fixture_only_and_expected_shape():
     ops = payload.get("ops", {})
 
     expected_ops = {
-        "raw_full_responses": ["csv_path"],
-        "staged_responses": ["contributors_csv_path", "responses_long_csv_path"],
-        "ultfoc_mapper": ["ultfoc_mapper_csv_path"],
-        "cell_number_mapper": ["cell_number_mapper_csv_path"],
-        "manual_outliers": ["manual_outliers_csv_path"],
-        "site_apportionment_factors": ["site_factors_csv_path"],
+        "raw__full_responses": ["csv_path"],
+        "intermediate__staged_responses": ["contributors_csv_path", "responses_long_csv_path"],
+        "ref__ultfoc_mapper": ["ultfoc_mapper_csv_path"],
+        "ref__cell_number_mapper": ["cell_number_mapper_csv_path"],
+        "ops__manual_outliers": ["manual_outliers_csv_path"],
+        "ref__site_apportionment_factors": ["site_factors_csv_path"],
     }
 
     assert set(ops) == set(expected_ops)
@@ -104,9 +104,4 @@ def test_full_synthetic_v1_run_config_ops_are_available_in_local_demo_definition
     available_op_names = {asset_def.op.name for asset_def in local_demo_definitions.defs.assets}
 
     for configured_op in configured_ops:
-        assert any(
-            available_op == configured_op
-            or available_op.endswith(f"__{configured_op}")
-            or (configured_op == "raw_full_responses" and available_op == "raw__full_responses")
-            for available_op in available_op_names
-        )
+        assert configured_op in available_op_names
