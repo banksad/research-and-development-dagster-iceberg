@@ -1,2 +1,2 @@
 survey_year,survey_type,reference,instance,manual_outlier,outlier_reason
-2025,BERD,SYN002,1,True,synthetic override
+2025,BERD,SYN002,0,True,synthetic override
