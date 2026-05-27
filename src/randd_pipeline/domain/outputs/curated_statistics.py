@@ -49,6 +49,6 @@ def build_curated_rnd_statistics(
     long_df = grouped.melt(id_vars=list(group_columns), var_name="_source_measure_column", value_name="output_value")
     long_df["output_measure"] = long_df["_source_measure_column"].map(measures)
     long_df["source_table_identifier"] = source_table_identifier
-    long_df["source_snapshot_id"] = source_snapshot_id
-    long_df["pipeline_run_id"] = pipeline_run_id
+    long_df["source_snapshot_id"] = pd.Series(source_snapshot_id, index=long_df.index, dtype="string")
+    long_df["pipeline_run_id"] = pd.Series(pipeline_run_id, index=long_df.index, dtype="string")
     return long_df[list(group_columns) + ["output_measure", "output_value", "source_table_identifier", "source_snapshot_id", "pipeline_run_id"]]

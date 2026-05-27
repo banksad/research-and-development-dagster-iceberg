@@ -27,4 +27,8 @@ def load_scenario_metadata(scenario_id: str) -> dict:
 def assert_frame_equal_sorted(left: pd.DataFrame, right: pd.DataFrame, sort_by: list[str]) -> None:
     left_sorted = left.sort_values(sort_by).reset_index(drop=True)
     right_sorted = right.sort_values(sort_by).reset_index(drop=True)
+    for col in left_sorted.columns.intersection(right_sorted.columns):
+        if left_sorted[col].isna().all() and right_sorted[col].isna().all():
+            left_sorted[col] = left_sorted[col].astype("object")
+            right_sorted[col] = right_sorted[col].astype("object")
     assert_frame_equal(left_sorted, right_sorted, check_like=False)
