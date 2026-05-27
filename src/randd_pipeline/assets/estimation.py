@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, List
 
 from src.randd_pipeline.domain.estimation import calculate_minimal_estimation_weights
 from src.randd_pipeline.io import refs
@@ -24,7 +22,7 @@ else:
         target_column: str = Field(default="709", description="Column required to be present for records used in estimation.")
         selected_selection_type: str = Field(default="P", description="Selection type included in the minimal v1 weighting calculation.")
         selected_form_type: str = Field(default="0006", description="Form type included in the minimal v1 weighting calculation.")
-        clear_statuses: list[str] = Field(default=["Clear", "Clear - overridden"], description="Statuses treated as clear/valid for estimation.")
+        clear_statuses: List[str] = Field(default_factory=lambda: ["Clear", "Clear - overridden"], description="Statuses treated as clear/valid for estimation.")
         selected_instance: int = Field(default=0, description="Response instance included in the minimal v1 weighting calculation.")
 
         @field_validator("cell_column", "population_count_column", "population_employment_column", "employment_column", "outlier_column", "selection_type_column", "form_type_column", "status_column", "target_column", "selected_selection_type", "selected_form_type")
@@ -36,7 +34,7 @@ else:
 
         @field_validator("clear_statuses")
         @classmethod
-        def _clear_statuses_valid(cls, value: list[str]) -> list[str]:
+        def _clear_statuses_valid(cls, value: List[str]) -> List[str]:
             if not value or any(not v.strip() for v in value):
                 raise ValueError("clear_statuses must be non-empty and contain no blank values.")
             return value

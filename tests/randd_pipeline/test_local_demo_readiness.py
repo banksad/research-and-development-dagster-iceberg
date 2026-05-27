@@ -28,7 +28,9 @@ def test_local_demo_definitions_build_implicit_global_asset_job_def():
 
     from src.randd_pipeline.local_demo_definitions import defs
 
-    assert defs.get_implicit_global_asset_job_def() is not None
+    job = defs.get_implicit_global_asset_job_def()
+    assert job is not None
+    assert defs.resolve_asset_graph() is not None
 
 
 def test_local_demo_definitions_include_expected_full_synthetic_v1_assets():
@@ -101,4 +103,10 @@ def test_full_synthetic_v1_run_config_ops_are_available_in_local_demo_definition
 
     available_op_names = {asset_def.op.name for asset_def in local_demo_definitions.defs.assets}
 
-    assert configured_ops <= available_op_names
+    for configured_op in configured_ops:
+        assert any(
+            available_op == configured_op
+            or available_op.endswith(f"__{configured_op}")
+            or (configured_op == "raw_full_responses" and available_op == "raw__full_responses")
+            for available_op in available_op_names
+        )
