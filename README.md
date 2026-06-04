@@ -6,6 +6,38 @@ Calculating national and regional research and development expenditure as part o
 
 Additional information about the aims and objectives of the project will go here when it is available. The project is currently in pre-discovery.
 
+## Dagster pipelines quickstart
+
+The current refoundation Dagster path can be run locally with synthetic fixtures only; it does not require production data, secrets, or cloud credentials.
+
+1. Create and activate a virtual environment.
+
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate
+   ```
+
+2. Install the combined development dependencies.
+
+   ```bash
+   make requirements-dev
+   ```
+
+3. Run the local synthetic end-to-end smoke test.
+
+   ```bash
+   pytest -q tests/randd_pipeline/test_full_synthetic_v1_chain.py
+   ```
+
+4. Start the local Dagster UI demo.
+
+   ```bash
+   make dagster-refoundation-local-demo
+   ```
+
+5. Open the Dagster URL printed in the terminal, usually `http://127.0.0.1:3000`, and launch a run using `config/dagster/full_synthetic_v1_run_config.yaml`.
+
+For full install, run, re-run, and troubleshooting notes, see [Install and run the Dagster pipelines](./docs/user_guide/install_and_run_dagster.md).
 
 ## Licence
 
